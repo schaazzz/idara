@@ -9,47 +9,31 @@
             </div>
             <div id="collapse-add-user" class="panel-collapse collapse in">
                 <div class="panel-body">
-                    <form class="form-inline" role="form">
-                        <div class="form-group" style="width:100%;">
-                            <input type="text" id="input-username" class="form-control" placeholder="Username..." style="width:45%;"/>
-                            <input type="password" id="input-password" class="form-control" placeholder="Password..." style="width:45%;"/>
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <input type="text" id="input-username" class="form-control" placeholder="Username..."/>
                         </div>
-                        <div class="bootstrap-switch-square">
-                            <label class="share-label" for="custom-switch-03">
-                                Root
-                                <input type="checkbox" checked data-toggle="switch" id="custom-switch-03" data-on-text="<span class='fui-check'></span>" data-off-text="<span class='fui-cross'></span>" />
-                            </label>
+                        <div class="col-xs-6">
+                            <input type="password" id="input-password" class="form-control" placeholder="Password..."/>
                         </div>
-                        <a href="#nolink" id="btn-add-user" class="btn btn-lg btn-primary">Add</a>
-                    </form>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6 pull-right">
+                            <div class="bootstrap-switch-square pull-right">
+                                <label for="switch-toggle-root">
+                                    Allow Root Privileges?&nbsp;&nbsp;&nbsp;
+                                    <input type="checkbox" data-toggle="switch" id="switch-toggle-root" data-off-color="danger" data-on-color="primary" data-on-text="<span class='fui-check'></span>" data-off-text="<span class='fui-cross'></span>" />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-4 center-block" style="float: none;">
+                            <a href="#nolink" id="btn-add-user" class="btn btn-block btn-lg btn-primary">Add User</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Collapsible Group 2</a>
-                    </h4>
-                </div>
-                <div id="collapse2" class="panel-collapse collapse">
-                    <div class="panel-body">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Collapsible Group 3</a>
-                        </h4>
-                    </div>
-                    <div id="collapse3" class="panel-collapse collapse">
-                        <div class="panel-body">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
-                        </div>
-                    </div>
-                </div>
-
-
+    </div>
 </template>

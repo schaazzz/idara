@@ -1,1 +1,22 @@
-/* CSS declarations go here */
+.bootstrap-switch-danger {
+    color: #e74c3c;
+    background-color: #2d0a06;
+}
+
+.bootstrap-switch-danger ~ .bootstrap-switch-handle-off:before {
+    background-color: #e74c3c;
+    border-color: #2d0a06;
+}
+
+.bootstrap-switch-on .bootstrap-switch-danger ~ .bootstrap-switch-handle-off {
+    box-shadow: inset 16px 0 0 #2d0a06;
+}
+
+.bootstrap-switch-off .bootstrap-switch-handle-on ~ .bootstrap-switch-handle-off.bootstrap-switch-danger {
+    box-shadow: inset 0 0 transparent, -16px 0 0 #2d0a06;
+}
+
+.bootstrap-switch-off .bootstrap-switch-handle-on ~ .bootstrap-switch-handle-off.bootstrap-switch-danger:before {
+    background-color: #e74c3c;
+    border-color: #2d0a06;
+}

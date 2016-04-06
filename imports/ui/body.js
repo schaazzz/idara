@@ -37,4 +37,9 @@ Template.body.events({
             target.set('controlPanel');
         }
     },
+    'click [id=btn-logout]'(event, template) {
+        Meteor.logout(function (error) {
+            loggedIn.set(false);
+        });
+    },
 });
