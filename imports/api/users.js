@@ -2,24 +2,6 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
 
-Meteor.methods({
-    'users.insert'(username, password, isRoot) {
-        check(username, String);
-        check(password, String);
-        check(isRoot, Boolean);
-
-        if(Meteor.users.find({}).count() != 0 || !Meteor.users.isRoot) {
-            return false;
-        }
-
-        console.log(Meteor.users.find({}).count());
-        console.log('Server: Adding user (root: %s) %s:%s', isRoot, username, password);
-    },
-    'users.list'() {
-        return 'user list';
-    }
-});
-
 if (Meteor.isServer) {
     Accounts.validateLoginAttempt(function (info) {
         console.log('===========> Accounts.validateLoginAttempt()');
