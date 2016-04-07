@@ -3,9 +3,11 @@ import { Template } from 'meteor/templating';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Accounts } from 'meteor/accounts-base';
 import '../api/users.js';
+import '../api/projects.js';
 import './login.js';
 import './cpanel.js';
 import './home.js';
+import './projects.js';
 import './body.html';
 
 loggedIn = new ReactiveVar(true);
@@ -41,5 +43,8 @@ Template.body.events({
         Meteor.logout(function (error) {
             loggedIn.set(false);
         });
+    },
+    'click [id=btn-list-projects]'(event, template) {
+        target.set('projects');
     },
 });

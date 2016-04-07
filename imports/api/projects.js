@@ -11,8 +11,15 @@ Meteor.methods({
 
         console.log(name);
         console.log(description);
+
+        Projects.insert({
+            name: name,
+            description: description,
+            createdAt: new Date(),
+            createdBy: Meteor.user().username,
+        });
     },
     'projects.list'() {
-        return 'user list';
+        return Projects.find({}, {'_id': 0, 'name': 1, description: '1'});
     }
 });

@@ -1,0 +1,9 @@
+<template name="projects">
+    <ul>
+        {{#each project in projects}}
+            <div class="col-xs-12">
+                <li><a href='#' data-toggle="tooltip" title="{{project.description}}" data-placement="right">{{project.name}}</a></li>
+            </div>
+        {{/each}}
+    </ul>
+</template>
