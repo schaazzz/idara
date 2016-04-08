@@ -1,0 +1,25 @@
+<template name="projectPage">
+    <div class="row">
+        <div class="col-xs-12">
+            <h3 class="page-header">{{project.name}}</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <p>{{project.description}}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">
+            <select id="select-filter" class="form-control" data-toggle="select" style="width: auto !important; border: 1px solid #bdc3c7 !important;">
+                <option value="0" selected>All Issues</option>
+                <option value="1">Open Issues</option>
+                <option value="2">Undecided Issues</option>
+                <option value="3">Closed Issues</option>
+            </select>
+        </div>
+        <div class="col-xs-5">
+            <a href="#nolink" id="new-issue" class="pull-right">Add New Issue</a>
+        </div>
+    </div>
+</template>

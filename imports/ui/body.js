@@ -8,10 +8,13 @@ import './login.js';
 import './cpanel.js';
 import './home.js';
 import './projects.js';
+import './project-page.js';
+import './new-issue.js';
 import './body.html';
 
 loggedIn = new ReactiveVar(true);
 target = new ReactiveVar('home');
+activeProject = new ReactiveVar(null);
 
 Template.body.onCreated(function onCreated() {
     this.state = new ReactiveDict();

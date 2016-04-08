@@ -1,9 +1,13 @@
 <template name="projects">
-    <ul>
-        {{#each project in projects}}
-            <div class="col-xs-12">
-                <li><a href='#' data-toggle="tooltip" title="{{project.description}}" data-placement="right">{{project.name}}</a></li>
-            </div>
-        {{/each}}
-    </ul>
+    <div class="row">
+        <div class="col-xs-12">
+            <ul style="padding-left: 15px;">
+                {{#each project in projects}}
+                    <div class="col-xs-12">
+                        <li><a href="#nolink" name="show-project" id={{project.name}} data-toggle="tooltip" title="{{project.description}}" data-placement="right">{{project.name}}</a></li>
+                    </div>
+                {{/each}}
+            </ul>
+        </div>
+    </div>
 </template>
