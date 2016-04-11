@@ -27,3 +27,7 @@
     padding-top: 0px;
     border-bottom: 0px;
 }
+
+.custom-label {
+    font-weight: bolder;
+}

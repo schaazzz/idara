@@ -10,6 +10,7 @@ import './home.js';
 import './projects.js';
 import './project-page.js';
 import './new-issue.js';
+import './issue-page.js';
 import './body.html';
 
 loggedIn = new ReactiveVar(true);

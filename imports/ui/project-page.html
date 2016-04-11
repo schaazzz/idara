@@ -22,4 +22,26 @@
             <a href="#nolink" id="new-issue" class="pull-right">Add New Issue</a>
         </div>
     </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <table class="table table-responsive table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Responsible</th>
+                        <th>Title</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each issue in issues}}
+                        <tr id="{{issue.number}}" class="clickable-row" data-href="url:#nolink">
+                            <td id="{{issue.number}}">{{issue.number}}</td>
+                            <td id="{{issue.number}}">{{issue.responsible}}</td>
+                            <td id="{{issue.number}}">{{issue.title}}</td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </template>
