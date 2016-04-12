@@ -1,3 +1,77 @@
 <template name="issuePage">
-    {{issue}}
+    <div class="well well-lg">
+        <div class="row">
+            <div class="col-xs-12">
+                <h5>{{issue.title}}</h5>
+                Created by <b>{{issue.createdBy}}</b> at {{issue.createdAt}}
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-2">
+                <b>Status:</b>
+            </div>
+            <div class="col-xs-3">
+                <p class="pull-left">{{issue.status}}</p>
+            </div>
+            <div class="col-xs-2"></div>
+            <div class="col-xs-2">
+                <b>Start date:</b>
+            </div>
+            <div class="col-xs-3">
+                <p class="pull-left">{{issue.startDate}}></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-2">
+                <b>Responible:</b>
+            </div>
+            <div class="col-xs-3">
+                <p class="pull-left">{{issue.responsible}}</p>
+            </div>
+            <div class="col-xs-2"></div>
+            <div class="col-xs-2">
+                <b>Due date:</b>
+            </div>
+            <div class="col-xs-3">
+                <p class="pull-left">{{issue.dueDate}}</p>
+            </div>
+        </div>
+
+        <hr>
+        <b>Description</b>
+        <p>
+            {{issue.description}}
+        </p>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <b>History</b>
+        </div>
+        <div class="col-xs-12">
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-10">
+            <b>Comments</b>
+        </div>
+        <div class="col-xs-2">
+            <a class="pull-right" href="#div-comment" role="button" data-toggle="collapse" aria-expanded="false" aria-controls="div-comment">Add</a>
+        </div>
+        <div class="collapse" id="div-comment">
+            <div class="col-xs-12">
+                <textarea id="txt-comment" class="form-control" placeholder="Project Description"></textarea>
+            </div>
+            <div class="col-xs-12" style="padding-top: 5px;">
+                <a class="pull-right btn btn-primary" href="#no-link" id="btn-add-comment">Add Comment</a>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <hr>
+        </div>
+    </div>
 </template>

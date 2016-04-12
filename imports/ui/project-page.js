@@ -22,10 +22,8 @@ Template.projectPage.events({
     'click [id=new-issue]'(event, template) {
         target.set('newIssue');
     },
-    'click .clickable-row'(event, template) {
-        // console.log(event);
-        console.log(event.target.id);
+    'click [name=open-issue-page]'(event, template) {
         activeIssue.set(event.target.id);
-        // target.set('issuePage');
+        target.set('issuePage');
     }
 });

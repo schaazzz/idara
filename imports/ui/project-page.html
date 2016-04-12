@@ -28,16 +28,24 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Responsible</th>
                         <th>Title</th>
+                        <th>Tracker</th>
+                        <th>Status</th>
+                        <th>Responsible</th>
+                        <th>Due Date</th>
+                        <th>Created At</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each issue in issues}}
-                        <tr id="{{issue.number}}" class="clickable-row" data-href="url:#nolink">
-                            <td id="{{issue.number}}">{{issue.number}}</td>
-                            <td id="{{issue.number}}">{{issue.responsible}}</td>
-                            <td id="{{issue.number}}">{{issue.title}}</td>
+                        <tr>
+                            <td><a name="open-issue-page" href="#nolink" id="{{issue.number}}">{{issue.number}}</a></td>
+                            <td><a name="open-issue-page" href="#nolink" id="{{issue.number}}">{{issue.title}}</a></td>
+                            <td>{{issue.tracker}}</td>
+                            <td>Open</td>
+                            <td><a name="open-user-page" href="#nolink" id="{{issue.responsible}}">{{issue.responsible}}</a></td>
+                            <td>{{issue.dueDate}}</td>
+                            <td>{{issue.createdAt}}</td>
                         </tr>
                     {{/each}}
                 </tbody>

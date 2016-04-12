@@ -9,7 +9,9 @@ Template.issuePage.onRendered(function onRendered() {
 
 Template.issuePage.helpers({
     issue() {
-        return activeIssue.get() //Issues.findOne({'number': activeIssue.get()});
+        thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
+        thisIssue.startDate = moment(new Date(thisIssue.createdAt)).format('YYYY-MM-DD');
+        return thisIssue;
     }
 });
 

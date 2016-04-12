@@ -24,8 +24,9 @@ Meteor.methods({
             severity: severity,
             createdBy: Meteor.user().username,
             responsible: responsible,
-            createdAt: new Date(),
-            dueDate: new Date(dueDate)
+            status: 'Open',
+            createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+            dueDate: dueDate,
         });
     },
     'issues.list'() {
