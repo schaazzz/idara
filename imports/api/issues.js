@@ -28,8 +28,5 @@ Meteor.methods({
             createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
             dueDate: dueDate,
         });
-    },
-    'issues.list'() {
-        return Issues.find({});
     }
 });

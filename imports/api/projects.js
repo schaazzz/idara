@@ -19,7 +19,4 @@ Meteor.methods({
             createdBy: Meteor.user().username,
         });
     },
-    'projects.list'() {
-        return Projects.find({}, {'_id': 0, 'name': 1, description: '1'});
-    }
 });
