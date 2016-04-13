@@ -9,8 +9,23 @@ Meteor.methods({
         check(name, String);
         check(description, String);
 
-        console.log(name);
-        console.log(description);
+        workflow = [{
+            state: 'Open',
+        }, {
+            state:'Review',
+            hasParticipants: true,
+            participantsRole: 'Reviewer',
+            nextState: 'Implementation',
+            autoStateChange: true,
+        }, {
+            state:'Implementation',
+            hasParticipants: true,
+            participantsRole: 'Developer',
+            nextState: 'Test',
+            autoStateChange: false,
+        }, {
+            state: 'Closed'
+        }];
 
         Projects.insert({
             name: name,

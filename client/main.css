@@ -1,3 +1,7 @@
+hr {
+    border-top: 1px solid #ddd;
+}
+
 .bootstrap-switch-danger {
     color: #e74c3c;
     background-color: #2d0a06;

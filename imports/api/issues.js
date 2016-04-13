@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
+import {Projects} from './projects';
 
 export const Issues = new Mongo.Collection('issues');
 
@@ -28,5 +29,14 @@ Meteor.methods({
             createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
             dueDate: dueDate,
         });
+    },
+    'issues.incrementState'(project, issueNumber) {
+        thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
+        thisProject = Projects.findOne({'name': project});
+
+        if (thisIssue.stateIndex < (thisProject.workflow.length - 1)) {
+            thisIssue.stateIndex += 1;
+            Issues.update({'project': project, 'number': issueNumber}, {$set: {'stateIndex': thisIssue.stateIndex}});
+        }
     }
 });

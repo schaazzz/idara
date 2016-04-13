@@ -9,17 +9,17 @@
         </div>
         <div class="row">
             <div class="col-xs-2">
-                <b>Status:</b>
+                <b>State:</b>
             </div>
             <div class="col-xs-3">
-                <p class="pull-left">{{issue.status}}</p>
+                <p class="pull-left">{{currentState.state}}</p>
             </div>
             <div class="col-xs-2"></div>
             <div class="col-xs-2">
                 <b>Start date:</b>
             </div>
             <div class="col-xs-3">
-                <p class="pull-left">{{issue.startDate}}></p>
+                <p class="pull-left">{{issue.startDate}}</p>
             </div>
         </div>
 
@@ -44,48 +44,108 @@
         <p>
             {{issue.description}}
         </p>
+
+        <hr>
+        <div class="row">
+            {{#if currentState.hasParticipants}}
+                <div class="col-xs-4">
+                    <select id="select-responsible" class="form-control" data-toggle="select">
+                        <option value="-1" selected>Add {{currentState.participantsRole}}</option>
+                        {{#each user in users}}
+                            <option value="{{@index}}">{{user.username}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="col-xs-1">
+                    <a class="pull-left btn btn-primary" href="#no-link" id="btn-add-participant"><span class="glyphicon glyphicon-plus"></span></a>
+                </div>
+            {{/if}}
+
+            <div class="col-xs-4 pull-right">
+                {{#if isClosed}}
+                {{else}}
+                    {{#if isNextStateClosed}}
+                        <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state">Set {{nextState.state}}</a>
+                    {{else}}
+                        {{#if blockStateTransition}}
+                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state" disabled>Start {{nextState.state}}</a>
+                        {{else}}
+                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state">Start {{nextState.state}}</a>
+                        {{/if}}
+                    {{/if}}
+                {{/if}}
+            </div>
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-xs-12">
-            <b>History</b>
-        </div>
-        <div class="col-xs-12">
-            <hr>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-xs-10">
-            <b>Comments</b>
-        </div>
-        <div class="col-xs-2">
-            <a class="pull-right" href="#div-comment" role="button" data-toggle="collapse" aria-expanded="false" aria-controls="div-comment">Add</a>
-        </div>
-        <div class="collapse" id="div-comment">
+    <div class="well well-lg">
+        <div class="row">
             <div class="col-xs-12">
-                <textarea id="txt-comment" class="form-control" placeholder="Project Description"></textarea>
+                <b>History</b>
             </div>
-            <div class="col-xs-12" style="padding-top: 5px;">
-                <a class="pull-right btn btn-primary" href="#no-link" id="btn-add-comment">Add Comment</a>
+            <div class="col-xs-12">
+                <hr>
             </div>
-        </div>
-        <div class="col-xs-12">
-            <hr>
+            <div class="col-xs-12">
+                <ul>
+                    {{#each entry in issue.history}}
+                        <li>{{entry}}</li>
+                    {{/each}}
+                </ul>
+            </div>
         </div>
     </div>
-    {{#each comment in comments}}
-        <div class="well well-lg">
-            <div class="row">
-                <div class="col-xs-12">
-                    <small class="text-muted">By <strong>{{comment.createdBy}}</strong> at <strong>{{comment.createdAt}}</strong></small><small class="pull-right">#{{comment.number}}</small>
-                </div>
-                <div class="col-xs-12">
-                </div>
-                <div class="col-xs-12">
-                    {{comment.text}}
+    <ul class="nav nav-tabs">
+        {{#each state in allStates}}
+            {{#if state.isFirst}}
+                <li role="presentation" class="active"><a id="tab-{{state.state}}" name="comments-tab" data-toggle="pill" href="#{{state.state}}">{{state.state}}</a></li>
+            {{else}}
+                <li role="presentation"><a id="tab-{{state.state}}" name="comments-tab" data-toggle="pill" href="#{{state.state}}">{{state.state}}</a></li>
+            {{/if}}
+        {{/each}}
+    </ul>
+    <div class="tab-content">
+        {{#each state in allStates}}
+            <div id="{{state.state}}" class=
+                {{#if state.isFirst}}
+                    tab-pane fade in active
+                {{else}}
+                    tab-pane fade
+                {{/if}}
+                >
+                <div class="well well-lg">
+                    <div class="row">
+                        <div class="col-xs-10">
+                            <b>Comments</b>
+                        </div>
+                        <div class="col-xs-2">
+                            <a class="pull-right" href="#div-comment" role="button" data-toggle="collapse" aria-expanded="false" aria-controls="div-comment">Add</a>
+                        </div>
+                        <div class="collapse" id="div-comment">
+                            <div class="col-xs-12">
+                                <textarea id="txt-comment" class="form-control" placeholder="Project Description"></textarea>
+                            </div>
+                            <div class="col-xs-12" style="padding-top: 5px;">
+                                <a class="pull-right btn btn-primary" href="#no-link" id="btn-add-comment">Add Comment</a>
+                            </div>
+                        </div>
+                        <div class="col-xs-12">
+                            <hr>
+                        </div>
+                        {{#each comment in comments}}
+                            <div class="col-xs-12">
+                                <small class="text-muted"><strong>{{comment.createdBy}}</strong> at <strong>{{comment.createdAt}}:</strong></small><small class="pull-right">#{{comment.number}}</small>
+                            </div>
+                            <div class="col-xs-12">
+                                {{comment.text}}
+                            </div>
+                            <div class="col-xs-12">
+                                <hr>
+                            </div>
+                        {{/each}}
+                    </div>
                 </div>
             </div>
-        </div>
-    {{/each}}
+        {{/each}}
+    </div>
 </template>
