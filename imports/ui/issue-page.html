@@ -76,6 +76,16 @@
                 {{/if}}
             </div>
         </div>
+        {{#if blockStateTransition}}
+            <div class="row">
+                <div class="col-xs-12">
+                    <label class="pull-right checkbox" for="chk-state-complete">
+                        <input type="checkbox" value="" id="chk-state-complete" data-toggle="checkbox">
+                        {{currentState.state}} complete?
+                    </label>
+                </div>
+            </div>
+        {{/if}}
     </div>
 
     <div class="well well-lg">

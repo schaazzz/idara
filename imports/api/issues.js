@@ -7,13 +7,22 @@ export const Issues = new Mongo.Collection('issues');
 
 Meteor.methods({
     'issues.insert'(project, title, description, tracker, priority, severity, dueDate, responsible) {
+        check(project, String);
         check(title, String);
         check(description, String);
         check(tracker, String);
         check(priority, String);
         check(severity, String);
-        check(responsible, String);
         check(dueDate, String)
+        check(responsible, String);
+
+        var thisProject = Projects.findOne({'name': project});
+        var numWorkflowSteps = thisProject.workflow.length;
+        var participants = [];
+
+        for (var i  = 0; i < numWorkflowSteps; i++) {
+            participants.push([]);
+        }
 
         Issues.insert({
             number: Issues.find({}).count() + 1,
@@ -28,15 +37,39 @@ Meteor.methods({
             status: 'Open',
             createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
             dueDate: dueDate,
+            history: [],
+            participants: participants
         });
     },
     'issues.incrementState'(project, issueNumber) {
-        thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
-        thisProject = Projects.findOne({'name': project});
+        var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
+        var thisProject = Projects.findOne({'name': project});
 
         if (thisIssue.stateIndex < (thisProject.workflow.length - 1)) {
             thisIssue.stateIndex += 1;
             Issues.update({'project': project, 'number': issueNumber}, {$set: {'stateIndex': thisIssue.stateIndex}});
         }
+    },
+    'issues.addParticipant'(project, issueNumber, state, participant) {
+        var result = false;
+        var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
+
+        var participants = thisIssue.participants;
+        if(participants[state].indexOf(participant) < 0) {
+            participants[state].push(participant);
+            result = true;
+        }
+
+        Issues.update({'project': project, 'number': issueNumber}, {$set: {'participants': participants}});
+
+        return result;
+    },
+    'issues.addHistory'(project, issueNumber, text) {
+        var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
+
+        var history = thisIssue.history;
+        history.push(text);
+
+        Issues.update({'project': project, 'number': issueNumber}, {$set: {'history': history}});
     }
 });

@@ -5,13 +5,9 @@ import '../api/projects.js';
 import './cpanel.html';
 
 Template.controlPanel.onCreated(function onCreated() {
-    console.log('=======================================xc');
-    console.log(this);
 });
 
 Template.controlPanel.onRendered(function onRendered() {
-    console.log('=======================================r');
-    console.log(this);
     this.$('#switch-toggle-root').bootstrapSwitch();
 
     onShow = function(event) {
