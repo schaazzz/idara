@@ -22,8 +22,13 @@ Meteor.methods({
 
         for (var i  = 0; i < numWorkflowSteps; i++) {
             participants.push([]);
+
+            if (thisProject.workflow[i].hasParticipants) {
+                participants[i].push(responsible);
+            }
         }
 
+        var historyTxt = '[' + moment(new Date()).format('YYYY-MM-DD, HH:MM') + '] Issue created by ' + Meteor.user().username + ' and assigned to ' + responsible;
         Issues.insert({
             number: Issues.find({}).count() + 1,
             project: project,
@@ -34,10 +39,10 @@ Meteor.methods({
             severity: severity,
             createdBy: Meteor.user().username,
             responsible: responsible,
-            status: 'Open',
+            stateIndex: 0,
             createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
             dueDate: dueDate,
-            history: [],
+            history: [historyTxt],
             participants: participants
         });
     },

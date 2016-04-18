@@ -28,6 +28,10 @@ Template.body.onCreated(function onCreated() {
     }
 });
 
+Template.registerHelper("not", function(condition) {
+    return !condition;
+});
+
 Template.body.helpers({
     showLoginForm() {
         return !loggedIn.get();
