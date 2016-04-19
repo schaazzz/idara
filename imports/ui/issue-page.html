@@ -12,7 +12,7 @@
                 <b>State:</b>
             </div>
             <div class="col-xs-3">
-                <p class="pull-left">{{currentState.state}}</p>
+                <p class="pull-left">{{currentState.stateName}}</p>
             </div>
             <div class="col-xs-2"></div>
             <div class="col-xs-2">
@@ -65,12 +65,12 @@
                 {{#if isClosed}}
                 {{else}}
                     {{#if isNextStateClosed}}
-                        <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state">Set {{nextState.state}}</a>
+                        <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state">Set {{nextState}}</a>
                     {{else}}
                         {{#if blockStateTransition}}
-                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state" disabled>Start {{nextState.state}}</a>
+                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state" disabled>Start {{nextState}}</a>
                         {{else}}
-                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state">Start {{nextState.state}}</a>
+                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state">Start {{nextState}}</a>
                         {{/if}}
                     {{/if}}
                 {{/if}}
@@ -81,7 +81,7 @@
             <div class="col-xs-12">
                 <label class="checkbox">
                     {{#if haveAllParticipantsCommented}}
-                        All {{currentState.participantsRole}}s have commented, mark {{currentState.state}} complete?
+                        All {{currentState.participantsRole}}s have commented, mark {{currentState.stateName}} complete?
                     {{else}}
                         Waiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
                     {{/if}}
@@ -115,14 +115,14 @@
         <ul id="div-state-tabs" class="nav nav-tabs">
             {{#each state in allStates}}
                 {{#if state.isFirst}}
-                    <li role="presentation" class="active"><a id="tab-{{state.state}}" name="comments-tab" data-toggle="pill" href="#{{state.state}}">{{state.state}}</a></li>
+                    <li role="presentation" class="active"><a id="tab-{{state.stateName}}" name="comments-tab" data-toggle="pill" href="#{{state.stateName}}">{{state.stateName}}</a></li>
                 {{else}}
-                    <li role="presentation"><a id="tab-{{state.state}}" name="comments-tab" data-toggle="pill" href="#{{state.state}}">{{state.state}}</a></li>
+                    <li role="presentation"><a id="tab-{{state.stateName}}" name="comments-tab" data-toggle="pill" href="#{{state.stateName}}">{{state.stateName}}</a></li>
                 {{/if}}
             {{/each}}
         </ul>
         <div class="tab-content">
-            <div id="{{state.state}}" class="tab-pane fade in active">
+            <div id="{{state.stateName}}" class="tab-pane fade in active">
                 <div class="well well-lg">
                     <div class="row">
                         <div class="col-xs-10">

@@ -6,7 +6,7 @@ import {Comments} from '../api/comments.js';
 import './issue-page.html';
 
 var tabChanged = new ReactiveVar(false);
-var nextState = new ReactiveVar(null);
+var nextStateName = new ReactiveVar('');
 var currentState = new ReactiveVar(null);
 var unblockStateTransition = new ReactiveVar(false);
 
@@ -20,8 +20,8 @@ Template.issuePage.onRendered(function onRendered() {
 
     this.$('#chk-state-complete').radiocheck();
 
-    if ((workflow[thisIssue.stateIndex].state != 'Open') &&
-        (workflow[thisIssue.stateIndex].state != 'Closed')) {
+    if ((workflow[thisIssue.stateIndex].stateName != 'Open') &&
+        (workflow[thisIssue.stateIndex].stateName != 'Closed')) {
         this.$('#div-state-complete').removeClass('hidden');
     } else {
         this.$('#div-state-complete').addClass('hidden');
@@ -32,7 +32,7 @@ Template.issuePage.onRendered(function onRendered() {
     this.autorun(function() {
         state = currentState.get();
         if (state.hasParticipants)  {
-            $('#tab-' + state.state).tab('show');
+            $('#tab-' + state.stateName).tab('show');
             tabChanged.set(true);
         }
     });
@@ -53,11 +53,7 @@ Template.issuePage.helpers({
         return workflow;
     },
     isNextStateClosed() {
-        var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
-        var thisProject = Projects.findOne({'name': activeProject.get()});
-        var workflow = thisProject.workflow;
-
-        return workflow[thisIssue.stateIndex + 1].state == 'Closed';
+        return nextStateName.get() == 'Closed';
     },
     isClosed() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
@@ -88,10 +84,15 @@ Template.issuePage.helpers({
         var thisProject = Projects.findOne({'name': activeProject.get()});
         var workflow = thisProject.workflow;
 
-        state = workflow[thisIssue.stateIndex + 1];
-        nextState.set(state)
+        var name = workflow[thisIssue.stateIndex].nextState;
+        var transition = name.split(':')[0];
+        name = name.split(':')[1];
+        nextStateName.set('nextStateName');
 
-        return state;
+        console.log('Next State Name(s): ', name);
+        console.log('Next State Transition: ', transition);
+
+        return name;
     },
     issue() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
@@ -112,7 +113,7 @@ Template.issuePage.helpers({
 
             var stateIndex = 0;
             for (stateIndex = 0; stateIndex < workflow.length; stateIndex++) {
-                if (workflow[stateIndex].state == tab) {
+                if (workflow[stateIndex].stateName == tab) {
                     break;
                 }
             }
@@ -129,8 +130,8 @@ Template.issuePage.helpers({
         var workflow = thisProject.workflow;
 
         var result = false;
-        if ((workflow[thisIssue.stateIndex].state != 'Open') &&
-            (workflow[thisIssue.stateIndex].state != 'Closed') &&
+        if ((workflow[thisIssue.stateIndex].stateName != 'Open') &&
+            (workflow[thisIssue.stateIndex].stateName != 'Closed') &&
             !unblockStateTransition.get()) {
             result = true;
         }
@@ -157,6 +158,7 @@ Template.issuePage.helpers({
             }
         }
 
+        console.log('haveAllParticipantsCommented: ', result);
         return result;
     }
 });
