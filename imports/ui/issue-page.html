@@ -111,24 +111,18 @@
             </div>
         </div>
     </div>
-    <ul class="nav nav-tabs">
-        {{#each state in allStates}}
-            {{#if state.isFirst}}
-                <li role="presentation" class="active"><a id="tab-{{state.state}}" name="comments-tab" data-toggle="pill" href="#{{state.state}}">{{state.state}}</a></li>
-            {{else}}
-                <li role="presentation"><a id="tab-{{state.state}}" name="comments-tab" data-toggle="pill" href="#{{state.state}}">{{state.state}}</a></li>
-            {{/if}}
-        {{/each}}
-    </ul>
-    <div class="tab-content">
-        {{#each state in allStates}}
-            <div id="{{state.state}}" class=
+    {{#if currentState.hasParticipants}}
+        <ul id="div-state-tabs" class="nav nav-tabs">
+            {{#each state in allStates}}
                 {{#if state.isFirst}}
-                    tab-pane fade in active
+                    <li role="presentation" class="active"><a id="tab-{{state.state}}" name="comments-tab" data-toggle="pill" href="#{{state.state}}">{{state.state}}</a></li>
                 {{else}}
-                    tab-pane fade
+                    <li role="presentation"><a id="tab-{{state.state}}" name="comments-tab" data-toggle="pill" href="#{{state.state}}">{{state.state}}</a></li>
                 {{/if}}
-                >
+            {{/each}}
+        </ul>
+        <div class="tab-content">
+            <div id="{{state.state}}" class="tab-pane fade in active">
                 <div class="well well-lg">
                     <div class="row">
                         <div class="col-xs-10">
@@ -162,10 +156,6 @@
                     </div>
                 </div>
             </div>
-        {{/each}}
-    </div>
+        </div>
+    {{/if}}
 </template>
-
-<!-- <template name="markIssueComplete">
-    <input type="checkbox" value="" id="chk-state-complete" data-toggle="checkbox" disabled={{not haveAllParticipantsCommented}}>{{test}}
-</template> -->

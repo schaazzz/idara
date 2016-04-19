@@ -5,7 +5,7 @@ import {Issues} from '../api/issues.js';
 import {Comments} from '../api/comments.js';
 import './issue-page.html';
 
-var selectedTab = new ReactiveVar(null);
+var tabChanged = new ReactiveVar(false);
 var nextState = new ReactiveVar(null);
 var currentState = new ReactiveVar(null);
 var unblockStateTransition = new ReactiveVar(false);
@@ -27,10 +27,14 @@ Template.issuePage.onRendered(function onRendered() {
         this.$('#div-state-complete').addClass('hidden');
     }
 
+    tabChanged.set(true);
+
     this.autorun(function() {
         state = currentState.get();
-        console.log($('#tab-' + state.state));
-        $('#tab-' + state.state).tab('show');
+        if (state.hasParticipants)  {
+            $('#tab-' + state.state).tab('show');
+            tabChanged.set(true);
+        }
     });
 });
 
@@ -95,8 +99,29 @@ Template.issuePage.helpers({
         return thisIssue;
     },
     comments() {
-        var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
-        return Comments.find({'project': activeProject.get(), 'issue': parseInt(activeIssue.get()), 'state': thisIssue.stateIndex});
+        var thisProject = Projects.findOne({'name': activeProject.get()});
+        var workflow = thisProject.workflow;
+
+        if (tabChanged.get()) {
+            tabChanged.set(false);
+        }
+
+        tab = $("ul#div-state-tabs li.active").children().attr("id");
+        if(tab) {
+            tab = tab.split('-')[1];
+
+            var stateIndex = 0;
+            for (stateIndex = 0; stateIndex < workflow.length; stateIndex++) {
+                if (workflow[stateIndex].state == tab) {
+                    break;
+                }
+            }
+
+            var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
+            return Comments.find({'project': activeProject.get(), 'issue': parseInt(activeIssue.get()), 'state': stateIndex});
+        } else {
+            return null;
+        }
     },
     blockStateTransition() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
@@ -147,13 +172,7 @@ Template.issuePage.events({
         Meteor.call('issues.incrementState', activeProject.get(), parseInt(activeIssue.get()));
     },
     'click [name=comments-tab]'(event, template) {
-        $('.tab-pane.in').removeClass('in');
-        $('.tab-pane.active').removeClass('active');
-
-        activePaneId = event.target.id.split('-')[1];
-
-        $('#' + activePaneId).addClass('active');
-        $('#' + activePaneId).addClass('in');
+        tabChanged.set(true);
     },
     'click [id=btn-add-participant]'(event, template) {
         if ($('#select-responsible').val() != -1) {
