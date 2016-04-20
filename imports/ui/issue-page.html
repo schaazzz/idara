@@ -12,7 +12,7 @@
                 <b>State:</b>
             </div>
             <div class="col-xs-3">
-                <p class="pull-left">{{currentState.stateName}}</p>
+                <p class="pull-left">{{currentState.stateName}} &nbsp;{{subStateMsg}}</p>
             </div>
             <div class="col-xs-2"></div>
             <div class="col-xs-2">
@@ -45,53 +45,64 @@
             {{issue.description}}
         </p>
 
-        <hr>
-        <div class="row">
-            {{#if currentState.hasParticipants}}
-                <div class="col-xs-4">
-                    <select id="select-responsible" class="form-control" data-toggle="select">
-                        <option value="-1" selected>Add {{currentState.participantsRole}}</option>
-                        {{#each user in users}}
-                            <option value="{{@index}}">{{user.username}}</option>
-                        {{/each}}
-                    </select>
-                </div>
-                <div class="col-xs-1">
-                    <a class="pull-left btn btn-primary" href="#no-link" id="btn-add-participant"><span class="glyphicon glyphicon-plus"></span></a>
-                </div>
-            {{/if}}
+        {{#if not disableIssueControls}}
+            <hr>
+            <div class="row">
+                {{#if currentState.hasParticipants}}
+                    <div class="col-xs-4">
+                        <select id="select-responsible" class="form-control" data-toggle="select">
+                            <option value="-1" selected>Add {{currentState.participantsRole}}</option>
+                            {{#each user in users}}
+                                <option value="{{@index}}">{{user.username}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="col-xs-1">
+                        <a class="pull-left btn btn-primary" href="#no-link" id="btn-add-participant"><span class="glyphicon glyphicon-plus"></span></a>
+                    </div>
+                {{/if}}
 
-            <div class="col-xs-4 pull-right">
-                {{#if isClosed}}
-                {{else}}
-                    {{#if isNextStateClosed}}
-                        <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state">Set {{nextState}}</a>
+                <div class="col-xs-4 pull-right">
+                    {{#if isClosed}}
+                        <a class="pull-right btn btn-primary" href="#no-link" id="btn-reopen-issue">Reopen Issue</a>
                     {{else}}
-                        {{#if blockStateTransition}}
-                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state" disabled>Start {{nextState}}</a>
+                        {{#if isNextStateClosed}}
+                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state" disabled={{blockStateTransition}}>Set {{stateTransition.nextStateSingle}}</a>
                         {{else}}
-                            <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state">Start {{nextState}}</a>
+                            {{# if stateTransition.prompt}}
+                                <div class="btn-group">
+                                    <button data-toggle="dropdown" class="btn btn-primary btn-lg dropdown-toggle" type="button" disabled={{blockStateTransition}}>
+                                        &nbsp;Select Next State&nbsp;<span class="caret"></span>
+                                    </button>
+                                    <ul role="menu" class="dropdown-menu" style="background-color: #e3e6e8">
+                                        {{#each state in stateTransition.nextStateList}}
+                                            <li><a name="btn-next-state" id="{{state}}" href="#">{{state}}</a></li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            {{else}}
+                                <a class="pull-right btn btn-primary" href="#no-link" id="btn-next-state" disabled={{blockStateTransition}}>Start {{stateTransition.nextStateSingle}}</a>
+                            {{/if}}
                         {{/if}}
                     {{/if}}
-                {{/if}}
+                </div>
             </div>
-        </div>
 
-        <div id="div-state-complete" class="row">
-            <div class="col-xs-12">
-                <label class="checkbox">
-                    {{#if haveAllParticipantsCommented}}
-                        All {{currentState.participantsRole}}s have commented, mark {{currentState.stateName}} complete?
-                    {{else}}
-                        Waiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
-                    {{/if}}
+            <div id="div-state-complete" class="row">
+                <div class="col-xs-12">
+                    <label class="checkbox">
+                        {{#if haveAllParticipantsCommented}}
+                            All {{currentState.participantsRole}}s have commented, mark {{currentState.stateName}} complete?
+                        {{else}}
+                            Waiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
+                        {{/if}}
 
-                    <input type="checkbox" value="" id="chk-state-complete" data-toggle="checkbox" disabled={{not haveAllParticipantsCommented}}>{{test}}
+                        <input type="checkbox" value="" id="chk-state-complete" data-toggle="checkbox" disabled={{not haveAllParticipantsCommented}}>{{test}}
 
-                </label>
+                    </label>
+                </div>
             </div>
-        </div>
-
+        {{/if}}
     </div>
 
     <div class="well well-lg">
@@ -111,7 +122,7 @@
             </div>
         </div>
     </div>
-    {{#if currentState.hasParticipants}}
+    {{#if showComments}}
         <ul id="div-state-tabs" class="nav nav-tabs">
             {{#each state in allStates}}
                 {{#if state.isFirst}}

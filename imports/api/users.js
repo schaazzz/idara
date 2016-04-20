@@ -2,13 +2,19 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
 
+Meteor.users.deny({
+    update: function() {
+        return true;
+    }
+});
+
 if (Meteor.isServer) {
     Accounts.validateLoginAttempt(function (info) {
         console.log('===========> Accounts.validateLoginAttempt()');
         console.log(info);
         var result = false;
 
-        if(info.user) {
+        if (info.user) {
             result = !info.user.profile.disableLogin;
             var newProfile = info.user.profile;
             newProfile.disableLogin = false;
@@ -19,10 +25,16 @@ if (Meteor.isServer) {
 
     Accounts.onCreateUser(function (options, user) {
         console.log('===========> Accounts.onCreateUser()');
-        user.profile = options.profile;
-        user.profile.disableLogin = true;
-        console.log(user);
-        return user;
+        if (Meteor.user().profile.isRoot) {
+            user.profile = options.profile;
+            user.profile.disableLogin = true;
+            console.log(user);
+            return user;
+        } else {
+            console.log('Not authorized...');
+            throw new Meteor.Error('not-authorized');
+            return null;
+        }
     });
 
     Accounts.validateNewUser(function (user) {
@@ -30,7 +42,7 @@ if (Meteor.isServer) {
         console.log(Meteor.user());
         console.log(Meteor.users.find({}).count());
         console.log(user);
-        if((Meteor.users.find({}).count() != 0)
+        if ((Meteor.users.find({}).count() != 0)
             &&  ((Meteor.user() == null)
                 ||  (Meteor.user() != null && !Meteor.user().profile.isRoot)
                 ||  Meteor.users.findOne({"username": user.username}))) {

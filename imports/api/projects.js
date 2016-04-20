@@ -18,35 +18,43 @@ Meteor.methods({
             participantsRole: 'Reviewer',
             nextState: '$fixed:CCB',
             autoStateChange: false,
+            openComments: true
         }, {
             stateName:'CCB',
             hasParticipants: true,
             participantsRole: 'Reviewer',
             nextState: '$prompt:Implementation,Closed',
             autoStateChange: false,
+            openComments: false,
         }, {
             stateName:'Implementation',
             hasParticipants: true,
             participantsRole: 'Developer',
             nextState: '$fixed:Test',
             autoStateChange: false,
+            openComments: false,
         }, {
             stateName:'Test',
             hasParticipants: true,
             participantsRole: 'Tester',
             nextState: '$fixed:Closed',
             autoStateChange: false,
+            openComments: false,
         }, {
             stateName: 'Closed',
-            subState: 'None'
+            nextState: '$none'
         }];
 
-        Projects.insert({
-            name: name,
-            description: description,
-            workflow: workflow,
-            createdAt: new Date(),
-            createdBy: Meteor.user().username,
-        });
+        if (Meteor.user().profile.isRoot) {
+            Projects.insert({
+                name: name,
+                description: description,
+                workflow: workflow,
+                createdAt: new Date(),
+                createdBy: Meteor.user().username,
+            });
+        } else {
+            throw new Meteor.Error('not-authorized');
+        }
     },
 });

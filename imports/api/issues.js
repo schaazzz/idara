@@ -47,15 +47,46 @@ Meteor.methods({
         });
     },
     'issues.incrementState'(project, issueNumber) {
+        check(project, String);
+        check(issueNumber, Number);
+
         var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
         var thisProject = Projects.findOne({'name': project});
 
-        if (thisIssue.stateIndex < (thisProject.workflow.length - 1)) {
-            thisIssue.stateIndex += 1;
-            Issues.update({'project': project, 'number': issueNumber}, {$set: {'stateIndex': thisIssue.stateIndex}});
+        if (thisIssue.responsible == Meteor.user().username) {
+            if (thisIssue.stateIndex < (thisProject.workflow.length - 1)) {
+                thisIssue.stateIndex += 1;
+                Issues.update({'project': project, 'number': issueNumber}, {$set: {'stateIndex': thisIssue.stateIndex}});
+            }
+        } else {
+            throw new Meteor.Error('not-authorized');
+        }
+    },
+    'issues.setState'(project, issueNumber, state, subStateMsg) {
+        check(project, String);
+        check(issueNumber, Number);
+        check(state, Number);
+
+        var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
+        var thisProject = Projects.findOne({'name': project});
+
+        if (thisIssue.responsible == Meteor.user().username) {
+            Issues.update({'project': project, 'number': issueNumber}, {$set: {'stateIndex': state}});
+
+            if(subStateMsg) {
+                check(subStateMsg, String);
+                Issues.update({'project': project, 'number': issueNumber}, {$set: {'subStateMsg': subStateMsg}});
+            }
+        } else {
+            throw new Meteor.Error('not-authorized');
         }
     },
     'issues.addParticipant'(project, issueNumber, state, participant) {
+        check(project, String);
+        check(issueNumber, Number);
+        check(state, Number);
+        check(participant, String);
+
         var result = false;
         var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
 
@@ -70,6 +101,10 @@ Meteor.methods({
         return result;
     },
     'issues.addHistory'(project, issueNumber, text) {
+        check(project, String);
+        check(issueNumber, Number);
+        check(text, String);
+
         var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
 
         var history = thisIssue.history;

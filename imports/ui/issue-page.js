@@ -46,21 +46,59 @@ Template.issuePage.helpers({
 
         if (thisIssue.stateIndex > 0) {
             workflow = thisProject.workflow;
-            workflow = workflow.slice(1, thisIssue.stateIndex + 1);
+
+            if (workflow[thisIssue.stateIndex].stateName == 'Closed') {
+                workflow = workflow.slice(1, workflow.length - 1);
+            } else {
+                workflow = workflow.slice(1, thisIssue.stateIndex + 1);
+            }
             workflow[0].isFirst = true;
         }
-
         return workflow;
+    },
+    stateTransition() {
+        var transition = {prompt: false, nextStateSingle: null, nextStateList: null}
+        var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
+        var thisProject = Projects.findOne({'name': activeProject.get()});
+        var workflow = thisProject.workflow;
+
+        var nextState = workflow[thisIssue.stateIndex].nextState;
+        if (name != '$none') {
+            var transitionMethod = nextState.split(':')[0];
+            nextStateName.set(nextState.split(':')[1]);
+
+            if (transitionMethod == '$prompt') {
+                transition.prompt = true;
+                transition.nextStateSingle = null;
+                transition.nextStateList = nextStateName.get().split(',');
+            } else {
+                transition.prompt = false;
+                transition.nextStateList = null;
+                transition.nextStateSingle = nextStateName.get();
+            }
+        }
+
+        return transition;
     },
     isNextStateClosed() {
         return nextStateName.get() == 'Closed';
+    },
+    disableIssueControls() {
+        var result = false;
+        var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
+
+        if (Meteor.user().username != thisIssue.responsible) {
+            result = true;
+        }
+
+        return result;
     },
     isClosed() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
         var thisProject = Projects.findOne({'name': activeProject.get()});
         var workflow = thisProject.workflow;
 
-        return workflow[thisIssue.stateIndex].state == 'Closed';
+        return workflow[thisIssue.stateIndex].stateName == 'Closed';
     },
     currentState() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
@@ -78,21 +116,6 @@ Template.issuePage.helpers({
         currentState.set(state)
 
         return state;
-    },
-    nextState() {
-        var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
-        var thisProject = Projects.findOne({'name': activeProject.get()});
-        var workflow = thisProject.workflow;
-
-        var name = workflow[thisIssue.stateIndex].nextState;
-        var transition = name.split(':')[0];
-        name = name.split(':')[1];
-        nextStateName.set('nextStateName');
-
-        console.log('Next State Name(s): ', name);
-        console.log('Next State Transition: ', transition);
-
-        return name;
     },
     issue() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
@@ -153,12 +176,32 @@ Template.issuePage.helpers({
             if (comment) {
                 result = true;
             } else {
+                $('#chk-state-complete').radiocheck('uncheck');
+                unblockStateTransition.set(false);
                 result = false;
                 break;
             }
         }
 
-        console.log('haveAllParticipantsCommented: ', result);
+        return result;
+    },
+    subStateMsg() {
+        var msg = '';
+        var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
+        var thisProject = Projects.findOne({'name': activeProject.get()});
+
+        if (thisProject.workflow[thisIssue.stateIndex].stateName == 'Closed') {
+            msg = '(' + thisIssue.subStateMsg + ')';
+        }
+
+        return msg;
+    },
+    showComments() {
+        var result = false;
+        if (currentState.get().hasParticipants || currentState.get().stateName == 'Closed') {
+            result = true;
+        }
+
         return result;
     }
 });
@@ -172,6 +215,22 @@ Template.issuePage.events({
     },
     'click [id=btn-next-state]'(event, template) {
         Meteor.call('issues.incrementState', activeProject.get(), parseInt(activeIssue.get()));
+    },
+    'click [name=btn-next-state]'(event, template) {
+        var stateIndex = 0;
+        var stateName = event.target.id;
+        var thisProject = Projects.findOne({'name': activeProject.get()});
+        var workflow = thisProject.workflow;
+        for (stateIndex = 0; stateIndex < workflow.length; stateIndex++) {
+            if (workflow[stateIndex].stateName == stateName) {
+                break;
+            }
+        }
+
+        if (stateName == 'Closed') {
+        } else {
+            Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), stateIndex);
+        }
     },
     'click [name=comments-tab]'(event, template) {
         tabChanged.set(true);
@@ -193,6 +252,11 @@ Template.issuePage.events({
     'change [id=chk-state-complete]'(event, template) {
         if (event.target.checked) {
             unblockStateTransition.set(true);
+        } else {
+            unblockStateTransition.set(false);
         }
     },
+    'click [id=btn-reopen-issue]'(event, template) {
+        console.log('Reopen issue!?');
+    }
 });
