@@ -30,7 +30,7 @@
                         <th>#</th>
                         <th>Title</th>
                         <th>Tracker</th>
-                        <th>Status</th>
+                        <th>State</th>
                         <th>Responsible</th>
                         <th>Due Date</th>
                         <th>Created At</th>
@@ -42,7 +42,7 @@
                             <td><a name="open-issue-page" href="#nolink" id="{{issue.number}}">{{issue.number}}</a></td>
                             <td><a name="open-issue-page" href="#nolink" id="{{issue.number}}">{{issue.title}}</a></td>
                             <td>{{issue.tracker}}</td>
-                            <td>Open</td>
+                            <td>{{issue.stateStr}}</td>
                             <td><a name="open-user-page" href="#nolink" id="{{issue.responsible}}">{{issue.responsible}}</a></td>
                             <td>{{issue.dueDate}}</td>
                             <td>{{issue.createdAt}}</td>

@@ -1,7 +1,58 @@
 <template name="home">
-    <div class="row">
-        <div class="col-xs-12">
-            <h3 class="page-header">My Tasks ({{taskCount}})</h3>
+    <h4 class="page-header">My Page</h4>
+    <strong>I'm responsible for ({{taskCount "responsible"}}) issues</strong>
+    <div class="well well-xs">
+        <div class="row">
+            <div class="col-xs-12">
+                <table class="table table-responsive table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Project</th>
+                            <th>Tracker</th>
+                            <th>Title</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each issue in responsible}}
+                            <tr>
+                                <td><a name="open-issue-page" href="#nolink" id="{{issue.project}}:{{issue.number}}">{{issue.number}}</a></td>
+                                <td><a name="open-project-page" href="#nolink" id="{{issue.project}}">{{issue.project}}</a></td>
+                                <td>{{issue.tracker}}</td>
+                                <td><a name="open-issue-page" href="#nolink" id="{{issue.project}}:{{issue.number}}">{{issue.title}}</a></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <strong>I'm a participant in ({{taskCount "participant"}}) issues</strong>
+    <div class="well well-xs">
+        <div class="row">
+            <div class="col-xs-12">
+                <table class="table table-responsive table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Project</th>
+                            <th>Tracker</th>
+                            <th>Title</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each issue in participant}}
+                            <tr>
+                                <td><a name="open-issue-page" href="#nolink" id="{{issue.project}}:{{issue.number}}">{{issue.number}}</a></td>
+                                <td><a name="open-project-page" href="#nolink" id="{{issue.project}}">{{issue.project}}</a></td>
+                                <td>{{issue.tracker}}</td>
+                                <td><a name="open-issue-page" href="#nolink" id="{{issue.project}}:{{issue.number}}">{{issue.title}}</a></td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </template>

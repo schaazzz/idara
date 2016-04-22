@@ -1,10 +1,15 @@
 <template name="issuePage">
     <div class="well well-lg">
         <div class="row">
-            <div class="col-xs-12">
+            <div class="col-xs-9">
                 <h5>{{issue.title}}</h5>
                 Created by <b>{{issue.createdBy}}</b> at {{issue.createdAt}}
                 <hr>
+            </div>
+            <div class="col-xs-3">
+                {{#if not disableIssueControls}}
+                    <a class="pull-right" href="#nolink" id="a-edit-issue">Edit</a>
+                {{/if}}
             </div>
         </div>
         <div class="row">
@@ -50,7 +55,7 @@
             <div class="row">
                 {{#if currentState.hasParticipants}}
                     <div class="col-xs-4">
-                        <select id="select-responsible" class="form-control" data-toggle="select">
+                        <select id="select-participant" class="form-control" data-toggle="select">
                             <option value="-1" selected>Add {{currentState.participantsRole}}</option>
                             {{#each user in users}}
                                 <option value="{{@index}}">{{user.username}}</option>
@@ -63,7 +68,7 @@
                 {{/if}}
 
                 <div class="col-xs-4 pull-right">
-                    {{#if isClosed}}
+                    {{#if isClosed.status}}
                         <a class="pull-right btn btn-primary" href="#no-link" id="btn-reopen-issue">Reopen Issue</a>
                     {{else}}
                         {{#if isNextStateClosed}}
@@ -88,17 +93,15 @@
                 </div>
             </div>
 
-            <div id="div-state-complete" class="row">
+            <div id="div-state-complete" class="row" {{isClosed.miscInfo}}>
                 <div class="col-xs-12">
                     <label class="checkbox">
                         {{#if haveAllParticipantsCommented}}
                             All {{currentState.participantsRole}}s have commented, mark {{currentState.stateName}} complete?
                         {{else}}
-                            Waiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
+                            Daiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
                         {{/if}}
-
                         <input type="checkbox" value="" id="chk-state-complete" data-toggle="checkbox" disabled={{not haveAllParticipantsCommented}}>{{test}}
-
                     </label>
                 </div>
             </div>
@@ -140,7 +143,9 @@
                             <b>Comments</b>
                         </div>
                         <div class="col-xs-2">
-                            <a class="pull-right" href="#div-comment" role="button" data-toggle="collapse" aria-expanded="false" aria-controls="div-comment">Add</a>
+                            {{#if allowComments}}
+                                <a class="pull-right" href="#div-comment" role="button" data-toggle="collapse" aria-expanded="false" aria-controls="div-comment">Add</a>
+                            {{/if}}
                         </div>
                         <div class="collapse" id="div-comment">
                             <div class="col-xs-12">

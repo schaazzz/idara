@@ -68,7 +68,7 @@
             <select id="select-responsible" class="form-control" data-toggle="select" style="height: auto !important;">
                 <option value="-1" selected></option>
                 {{#each user in users}}
-                    <option value="{{@index}}">{{user.username}}</option>
+                    <option value="{{user.username}}">{{user.username}}</option>
                 {{/each}}
             </select>
         </div>
@@ -82,7 +82,11 @@
 
     <div class="row" style="padding-top: 10px;">
         <div class="col-xs-12">
-            <a href="#nolink" id="btn-add-user" class="btn btn-lg btn-primary pull-right">Add This Issue</a>
+            {{#if edit}}
+                <a href="#nolink" id="btn-add-issue" class="btn btn-lg btn-primary pull-right">Update Issue</a>
+            {{else}}
+                <a href="#nolink" id="btn-add-issue" class="btn btn-lg btn-primary pull-right">Add This Issue</a>
+            {{/if}}
         </div>
     </div>
 </template>

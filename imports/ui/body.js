@@ -16,6 +16,7 @@ import './body.html';
 loggedIn = new ReactiveVar(true);
 target = new ReactiveVar('home');
 activeProject = new ReactiveVar(null);
+editIssue = new ReactiveVar(false);
 
 Template.body.onCreated(function onCreated() {
     this.state = new ReactiveDict();

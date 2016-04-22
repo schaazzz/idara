@@ -5,6 +5,16 @@ import {Issues} from '../api/issues.js';
 import './new-issue.html';
 
 Template.newIssue.onRendered(function onRendered() {
+    if (editIssue.get()){
+        var issue = Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())});
+        this.$('#issue-title').val(issue.title);
+        this.$('#select-tracker').val(issue.tracker);
+        this.$('#select-priority').val(issue.priority);
+        this.$('#select-severity').val(issue.severity);
+        this.$('#due-date').val(issue.dueDate);
+        this.$('#select-responsible').val(issue.responsible);
+        this.$('#issue-description').val(issue.description);
+    }
 });
 
 Template.newIssue.helpers({
@@ -13,11 +23,14 @@ Template.newIssue.helpers({
     },
     users() {
         return Meteor.users.find({});
+    },
+    edit() {
+        return editIssue.get();
     }
 });
 
 Template.newIssue.events({
-    'click [id=btn-add-user]'(event, template) {
+    'click [id=btn-add-issue]'(event, template) {
         title = template.find('#issue-title').value;
         tracker = template.find('#select-tracker').value;
         priority = template.find('#select-priority').value;
@@ -26,8 +39,12 @@ Template.newIssue.events({
         responsible = template.find('#select-responsible :selected').text;
         description = template.find('#issue-description').value;
 
-        Meteor.call('issues.insert', activeProject.get(), title, description, tracker, priority, severity, dueDate, responsible);
-        
+        if (editIssue.get()) {
+            Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, description, tracker, priority, severity, dueDate, responsible);
+        } else {
+            Meteor.call('issues.insert', activeProject.get(), title, description, tracker, priority, severity, dueDate, responsible);
+        }
+
         target.set('projectPage');
     }
 });

@@ -6,6 +6,7 @@ import {Comments} from '../api/comments.js';
 import './issue-page.html';
 
 var tabChanged = new ReactiveVar(false);
+var activeTab = new ReactiveVar('');
 var nextStateName = new ReactiveVar('');
 var currentState = new ReactiveVar(null);
 var unblockStateTransition = new ReactiveVar(false);
@@ -44,16 +45,34 @@ Template.issuePage.helpers({
         var thisProject = Projects.findOne({'name': activeProject.get()});
         var workflow = [];
 
+        commentsStateList = []
+        comments = Comments.find({'project': activeProject.get(), 'issue': parseInt(activeIssue.get())}).fetch();
+        prevState = '';
+        for (var i = 0; i < comments.length; i++) {
+            var currentState = comments[i].state;
+            if ((prevState != currentState) && (commentsStateList.indexOf(currentState) < 0)) {
+                commentsStateList.push(currentState);
+                prevState = currentState;
+            }
+        }
+
         if (thisIssue.stateIndex > 0) {
             workflow = thisProject.workflow;
 
             if (workflow[thisIssue.stateIndex].stateName == 'Closed') {
                 workflow = workflow.slice(1, workflow.length - 1);
+            } else if ((commentsStateList.length == 0) || (commentsStateList.indexOf(thisIssue.stateIndex) < 0)) {
+                if (workflow[thisIssue.stateIndex].stateName == 'Closed') {
+                    workflow = workflow.slice(1, workflow.length - 1);
+                } else {
+                    workflow = workflow.slice(1, thisIssue.stateIndex + 1);
+                }
             } else {
-                workflow = workflow.slice(1, thisIssue.stateIndex + 1);
+                workflow = workflow.slice(Math.min.apply(null, commentsStateList), Math.max.apply(null, commentsStateList) + 1)
             }
             workflow[0].isFirst = true;
         }
+
         return workflow;
     },
     stateTransition() {
@@ -94,11 +113,19 @@ Template.issuePage.helpers({
         return result;
     },
     isClosed() {
+        var result = {status: false, miscInfo: ''};
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
         var thisProject = Projects.findOne({'name': activeProject.get()});
         var workflow = thisProject.workflow;
 
-        return workflow[thisIssue.stateIndex].stateName == 'Closed';
+        if (workflow[thisIssue.stateIndex].stateName == 'Closed') {
+            $('#div-state-complete').addClass('hidden');
+            result.status = true;
+            result.miscInfo = 'hidden';
+            console.log('eee');
+        }
+
+        return result;
     },
     currentState() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
@@ -130,10 +157,10 @@ Template.issuePage.helpers({
             tabChanged.set(false);
         }
 
-        tab = $("ul#div-state-tabs li.active").children().attr("id");
+        var tab = $("ul#div-state-tabs li.active").children().attr("id");
         if(tab) {
             tab = tab.split('-')[1];
-
+            activeTab.set(tab);
             var stateIndex = 0;
             for (stateIndex = 0; stateIndex < workflow.length; stateIndex++) {
                 if (workflow[stateIndex].stateName == tab) {
@@ -194,11 +221,31 @@ Template.issuePage.helpers({
             msg = '(' + thisIssue.subStateMsg + ')';
         }
 
-        return msg;
+        return '';
     },
     showComments() {
         var result = false;
         if (currentState.get().hasParticipants || currentState.get().stateName == 'Closed') {
+            result = true;
+        }
+
+        return result;
+    },
+    allowComments() {
+        var thisIssue = Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())});
+        var result = false;
+
+        var tab = $("ul#div-state-tabs li.active").children().attr("id");
+        var tabStateIndex = 0;
+        for (tabStateIndex = 0; tabStateIndex < thisIssue.workflow.length; tabStateIndex++) {
+            if (thisIssue.workflow[tabStateIndex].stateName == activeTab.get()) {
+                break;
+            }
+        }
+
+        if((thisIssue.stateIndex == tabStateIndex)
+            && (thisIssue.workflow[thisIssue.stateIndex].openComments
+                ||  (thisIssue.participants[thisIssue.stateIndex].indexOf(Meteor.user().username) >= 0))) {
             result = true;
         }
 
@@ -214,6 +261,8 @@ Template.issuePage.events({
         $('#div-comment').removeClass('in');
     },
     'click [id=btn-next-state]'(event, template) {
+        $('#chk-state-complete').radiocheck('uncheck');
+        unblockStateTransition.set(false);
         Meteor.call('issues.incrementState', activeProject.get(), parseInt(activeIssue.get()));
     },
     'click [name=btn-next-state]'(event, template) {
@@ -228,21 +277,24 @@ Template.issuePage.events({
         }
 
         if (stateName == 'Closed') {
+            Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), stateIndex);
         } else {
             Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), stateIndex);
         }
+        $('#chk-state-complete').radiocheck('uncheck');
+        unblockStateTransition.set(false);
     },
     'click [name=comments-tab]'(event, template) {
         tabChanged.set(true);
     },
     'click [id=btn-add-participant]'(event, template) {
-        if ($('#select-responsible').val() != -1) {
+        if ($('#select-participant').val() != -1) {
             var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
             var thisProject = Projects.findOne({'name': activeProject.get()});
 
-            var participant = $('#select-responsible :selected').text()
+            var participant = $('#select-participant :selected').text()
             Meteor.call('issues.addParticipant', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, participant, function (error, result) {
-                if(result) {
+                if (result) {
                     var historyTxt = '[' + moment(new Date()).format('YYYY-MM-DD, HH:MM') + '] ' + Meteor.user().username + ' added ' + participant + ' as a ' + thisProject.workflow[thisIssue.stateIndex].participantsRole;
                     Meteor.call('issues.addHistory', activeProject.get(), parseInt(activeIssue.get()), historyTxt);
                 }
@@ -257,6 +309,10 @@ Template.issuePage.events({
         }
     },
     'click [id=btn-reopen-issue]'(event, template) {
-        console.log('Reopen issue!?');
+        Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), 1);
+    },
+    'click [id=a-edit-issue]'(event, template) {
+        editIssue.set(true);
+        target.set('newIssue');
     }
 });

@@ -17,10 +17,10 @@ Meteor.methods({
         check(responsible, String);
 
         var thisProject = Projects.findOne({'name': project});
-        var numWorkflowSteps = thisProject.workflow.length;
+        var workflow = thisProject.workflow;
         var participants = [];
 
-        for (var i  = 0; i < numWorkflowSteps; i++) {
+        for (var i  = 0; i < workflow.length; i++) {
             participants.push([]);
 
             if (thisProject.workflow[i].hasParticipants) {
@@ -40,10 +40,43 @@ Meteor.methods({
             createdBy: Meteor.user().username,
             responsible: responsible,
             stateIndex: 0,
+            stateStr: workflow[0].stateName,
+            isClosed: false,
+            workflow: workflow,
             createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
             dueDate: dueDate,
             history: [historyTxt],
             participants: participants
+        });
+    },
+    'issues.update'(project, issue, title, description, tracker, priority, severity, dueDate, responsible) {
+        check(project, String);
+        check(issue, Number);
+        check(title, String);
+        check(description, String);
+        check(tracker, String);
+        check(priority, String);
+        check(severity, String);
+        check(dueDate, String)
+        check(responsible, String);
+
+        var thisProject = Projects.findOne({'name': project});
+        var thisIssue = Issues.findOne({'project': project, 'number': issue});
+
+        thisIssue.history.push('[' + moment(new Date()).format('YYYY-MM-DD, HH:MM') + '] Issue updated by ' + Meteor.user().username);
+        Issues.update({
+            number: issue,
+            project: project
+        }, {$set: {
+                title: title,
+                description: description,
+                tracker: tracker,
+                priority: priority,
+                severity: severity,
+                responsible: responsible,
+                dueDate: dueDate,
+                history: thisIssue.history,
+            }
         });
     },
     'issues.incrementState'(project, issueNumber) {
@@ -56,7 +89,16 @@ Meteor.methods({
         if (thisIssue.responsible == Meteor.user().username) {
             if (thisIssue.stateIndex < (thisProject.workflow.length - 1)) {
                 thisIssue.stateIndex += 1;
-                Issues.update({'project': project, 'number': issueNumber}, {$set: {'stateIndex': thisIssue.stateIndex}});
+                thisIssue.isClosed = (thisIssue.stateIndex == thisIssue.workflow.length - 1);
+                Issues.update({
+                    'project': project, 'number': issueNumber
+                }, {
+                    $set: {
+                        'stateIndex': thisIssue.stateIndex,
+                        'isClosed': thisIssue.isClosed,
+                        'stateStr': thisIssue.workflow[thisIssue.stateIndex].stateName
+                    }
+                });
             }
         } else {
             throw new Meteor.Error('not-authorized');
@@ -71,7 +113,17 @@ Meteor.methods({
         var thisProject = Projects.findOne({'name': project});
 
         if (thisIssue.responsible == Meteor.user().username) {
-            Issues.update({'project': project, 'number': issueNumber}, {$set: {'stateIndex': state}});
+            thisIssue.stateIndex = state;
+            thisIssue.isClosed = (thisIssue.stateIndex == thisIssue.workflow.length - 1);
+            Issues.update({
+                'project': project, 'number': issueNumber
+            }, {
+                $set: {
+                    'stateIndex': thisIssue.stateIndex,
+                    'isClosed': thisIssue.isClosed,
+                    'stateStr': thisIssue.workflow[thisIssue.stateIndex].stateName
+                }
+            });
 
             if(subStateMsg) {
                 check(subStateMsg, String);
