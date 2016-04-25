@@ -1,0 +1,56 @@
+<template name="configProject">
+    <div class="well well-lg">
+        <div class="row">
+            <div class="col-xs-6">
+                <input type="text" id="input-projname" class="form-control" placeholder="Project Name"/>
+            </div>
+            <div class="col-xs-6">
+                <select id="select-admin" class="form-control" data-toggle="select">
+                    <option value="-1" selected>Select project admin</option>
+                    {{#each user in users}}
+                        <option value="{{user.username}}">{{user.username}}</option>
+                    {{/each}}
+                </select>
+            </div>
+        </div>
+        <div class="row" style="padding-top: 5px;">
+            <div class="col-xs-12">
+                <textarea id="txt-projdesc" class="form-control" placeholder="Project Description"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="well well-lg">
+
+        <div class="input-group" style="width: 42%;">
+            <select id="select-pm-user" class="form-control">
+                <option value="-1" selected>Select Users with PM Access</option>
+                {{#each user in users}}
+                    <option value={{user.username}}>{{user.username}}</option>
+                {{/each}}
+            </select>
+            <span class="input-group-btn">
+                <button id="btn-add-pm-user" class="btn dropdown-toggle btn-default" tabindex="-1">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+            </span>
+        </div>
+        <br>
+        <strong>Users with PM Access:</strong>
+        <br>
+        {{#each user in usersWithPmAcess}}
+            <span class="badge" style="background-color: #5bc0de;">
+                {{user}}
+                <a name="a-remove-pm-user" href="#nolink" style="color: #ffffff; font-size: 9px;">
+                    <span id={{user}} class="glyphicon glyphicon-remove"></span>
+                </a>
+            </span>
+        {{/each}}
+    </div>
+
+    <div class="row" style="padding-top: 5px;">
+        <div class="col-xs-4 center-block" style="float: none;">
+            <a href="#nolink" id="btn-save-changes" class="btn btn-block btn-lg btn-primary">Save Changes</a>
+        </div>
+    </div>
+</template>

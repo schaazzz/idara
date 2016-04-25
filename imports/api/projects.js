@@ -5,9 +5,10 @@ import { check } from 'meteor/check';
 export const Projects = new Mongo.Collection('projects');
 
 Meteor.methods({
-    'projects.insert'(name, description) {
+    'projects.insert'(name, description, admin) {
         check(name, String);
         check(description, String);
+        check(admin, String);
 
         workflow = [{
             stateName: 'Open',
@@ -49,6 +50,8 @@ Meteor.methods({
             Projects.insert({
                 name: name,
                 description: description,
+                admin: admin,
+                pmUsers: [],
                 workflow: workflow,
                 createdAt: new Date(),
                 createdBy: Meteor.user().username,
@@ -57,4 +60,21 @@ Meteor.methods({
             throw new Meteor.Error('not-authorized');
         }
     },
+    'projects.update'(_id, name, description, admin, pmUsers) {
+        check(_id, String);
+        check(name, String);
+        check(description, String);
+        check(admin, String);
+        check(pmUsers, [String]);
+
+        thisProject = Projects.findOne({'_id': _id});
+
+        if (Meteor.user().profile.isRoot || (Meteor.user().username == thisProject.admin)) {
+            Projects.update(
+                {'_id': _id},
+                {$set: {'name': name, 'description': description, 'admin': admin, 'pmUsers': pmUsers}});
+        } else {
+            throw new Meteor.Error('not-authorized');
+        }
+    }
 });

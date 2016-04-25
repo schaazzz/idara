@@ -1,28 +1,43 @@
 <template name="projectPage">
     <div class="row">
         <div class="col-xs-12">
-            <h3 class="page-header">{{project.name}}</h3>
+            <h3 class="page-header">{{project.name}}
+                {{#if editingAllowed}}
+                    <a href="#nolink" id="a-config-project" class="pull-right" style="font-size: 20px">
+                        <span class="pull-right glyphicon glyphicon-cog" style="margin-top: 13px;"></span>
+                    </a>
+                {{/if}}
+            </h3>
         </div>
     </div>
     <div class="row">
         <div class="col-xs-12">
-            <p>{{project.description}}</p>
+            <div class="well well-lg">
+                <p>{{project.description}}</p>
+                <hr>
+                <small class="text-muted">(Project admin: <strong>{{project.admin}}</strong>)</small>
+            </div>
         </div>
     </div>
     <div class="row">
         <div class="col-xs-6">
-            <select id="select-filter" class="form-control" data-toggle="select" style="width: auto !important; border: 1px solid #bdc3c7 !important;">
+            <select id="select-filter" class="form-control" data-toggle="select" style="width: auto !important; height: auto !important; border: 1px solid #bdc3c7 !important;">
                 <option value="0" selected>All Issues</option>
                 <option value="1">Open Issues</option>
                 <option value="2">Undecided Issues</option>
                 <option value="3">Closed Issues</option>
             </select>
         </div>
-        <div class="col-xs-5">
-            <a href="#nolink" id="new-issue" class="pull-right">Add New Issue</a>
+        <div class="col-xs-6">
+            {{#if addingIssuesAllowed}}
+                <a href="#nolink" id="new-issue" class="pull-right" style="font-size: 15px; margin-top: 9px;">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    &nbsp;New Issue
+                </a>
+            {{/if}}
         </div>
     </div>
-    <div class="row">
+    <div class="row" style="padding-top: 10px;">
         <div class="col-xs-12">
             <table class="table table-responsive table-striped table-hover">
                 <thead>

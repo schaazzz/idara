@@ -1,8 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
-import {Projects} from '../api/projects.js';
-import {Issues} from '../api/issues.js';
-import {Comments} from '../api/comments.js';
+import {Projects} from '../api/projects';
+import {Issues} from '../api/issues';
+import {Comments} from '../api/comments';
 import './issue-page.html';
 
 var tabChanged = new ReactiveVar(false);

@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
-import {Projects} from '../api/projects.js';
-import {Issues} from '../api/issues.js';
+import {Projects} from '../api/projects';
+import {Issues} from '../api/issues';
 import './new-issue.html';
 
 Template.newIssue.onRendered(function onRendered() {

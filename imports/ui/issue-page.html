@@ -30,7 +30,7 @@
 
         <div class="row">
             <div class="col-xs-2">
-                <b>Responible:</b>
+                <b>Responsible:</b>
             </div>
             <div class="col-xs-3">
                 <p class="pull-left">{{issue.responsible}}</p>
@@ -58,7 +58,7 @@
                         <select id="select-participant" class="form-control" data-toggle="select">
                             <option value="-1" selected>Add {{currentState.participantsRole}}</option>
                             {{#each user in users}}
-                                <option value="{{@index}}">{{user.username}}</option>
+                                <option value="{{user.username}}">{{user.username}}</option>
                             {{/each}}
                         </select>
                     </div>

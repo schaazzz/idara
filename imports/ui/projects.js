@@ -1,6 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
-import {Projects} from '../api/projects.js';
+import {Projects} from '../api/projects';
 import './projects.html';
 
 Template.projects.onRendered(function onRendered() {
