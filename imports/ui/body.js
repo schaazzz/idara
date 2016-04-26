@@ -57,4 +57,7 @@ Template.body.events({
     'click [id=btn-list-projects]'(event, template) {
         target.set('projects');
     },
+    'click [id=btn-usr-page]'(event, template) {
+        target.set('home');
+    },
 });
