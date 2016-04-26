@@ -31,6 +31,7 @@ Template.projectPage.helpers({
         thisProject = Projects.findOne({'name': activeProject.get()});
 
         if (Meteor.user().profile.isRoot
+            || thisProject.noIssueFilingRestrictions
             || (Meteor.user().username == thisProject.admin)
             || (thisProject.pmUsers.indexOf(Meteor.user().username) >= 0)) {
             result = true;

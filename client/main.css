@@ -35,3 +35,8 @@ hr {
 .custom-label {
     font-weight: bolder;
 }
+
+.disabled-div {
+    pointer-events: none;
+    opacity: 0.4;
+}

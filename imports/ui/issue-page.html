@@ -99,7 +99,7 @@
                         {{#if haveAllParticipantsCommented}}
                             All {{currentState.participantsRole}}s have commented, mark {{currentState.stateName}} complete?
                         {{else}}
-                            Daiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
+                            Waiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
                         {{/if}}
                         <input type="checkbox" value="" id="chk-state-complete" data-toggle="checkbox" disabled={{not haveAllParticipantsCommented}}>{{test}}
                     </label>

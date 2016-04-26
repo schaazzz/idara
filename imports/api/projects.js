@@ -50,6 +50,7 @@ Meteor.methods({
             Projects.insert({
                 name: name,
                 description: description,
+                noIssueFilingRestrictions: false,
                 admin: admin,
                 pmUsers: [],
                 workflow: workflow,
@@ -60,19 +61,27 @@ Meteor.methods({
             throw new Meteor.Error('not-authorized');
         }
     },
-    'projects.update'(_id, name, description, admin, pmUsers) {
+    'projects.update'(_id, name, description, admin, pmUsers, noIssueFilingRestrictions) {
         check(_id, String);
         check(name, String);
         check(description, String);
         check(admin, String);
         check(pmUsers, [String]);
+        check(noIssueFilingRestrictions, Boolean);
 
         thisProject = Projects.findOne({'_id': _id});
 
         if (Meteor.user().profile.isRoot || (Meteor.user().username == thisProject.admin)) {
             Projects.update(
                 {'_id': _id},
-                {$set: {'name': name, 'description': description, 'admin': admin, 'pmUsers': pmUsers}});
+                {$set: {
+                    'name': name,
+                    'description': description,
+                    'admin': admin,
+                    'pmUsers': pmUsers,
+                    'noIssueFilingRestrictions': noIssueFilingRestrictions
+                }}
+            );
         } else {
             throw new Meteor.Error('not-authorized');
         }

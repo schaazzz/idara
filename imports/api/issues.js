@@ -17,37 +17,44 @@ Meteor.methods({
         check(responsible, String);
 
         var thisProject = Projects.findOne({'name': project});
-        var workflow = thisProject.workflow;
-        var participants = [];
 
-        for (var i  = 0; i < workflow.length; i++) {
-            participants.push([]);
+        if (Meteor.user().profile.isRoot
+            || thisProject.noIssueFilingRestrictions
+            || (Meteor.user().username == thisProject.admin)
+            || (thisProject.pmUsers.indexOf(Meteor.user().username) >= 0)) {
+                
+            var workflow = thisProject.workflow;
+            var participants = [];
 
-            if (thisProject.workflow[i].hasParticipants) {
-                participants[i].push(responsible);
+            for (var i  = 0; i < workflow.length; i++) {
+                participants.push([]);
+
+                if (thisProject.workflow[i].hasParticipants) {
+                    participants[i].push(responsible);
+                }
             }
-        }
 
-        var historyTxt = '[' + moment(new Date()).format('YYYY-MM-DD, HH:MM') + '] Issue created by ' + Meteor.user().username + ' and assigned to ' + responsible;
-        Issues.insert({
-            number: Issues.find({}).count() + 1,
-            project: project,
-            title: title,
-            description: description,
-            tracker: tracker,
-            priority: priority,
-            severity: severity,
-            createdBy: Meteor.user().username,
-            responsible: responsible,
-            stateIndex: 0,
-            stateStr: workflow[0].stateName,
-            isClosed: false,
-            workflow: workflow,
-            createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
-            dueDate: dueDate,
-            history: [historyTxt],
-            participants: participants
-        });
+            var historyTxt = '[' + moment(new Date()).format('YYYY-MM-DD, HH:MM') + '] Issue created by ' + Meteor.user().username + ' and assigned to ' + responsible;
+            Issues.insert({
+                number: Issues.find({}).count() + 1,
+                project: project,
+                title: title,
+                description: description,
+                tracker: tracker,
+                priority: priority,
+                severity: severity,
+                createdBy: Meteor.user().username,
+                responsible: responsible,
+                stateIndex: 0,
+                stateStr: workflow[0].stateName,
+                isClosed: false,
+                workflow: workflow,
+                createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+                dueDate: dueDate,
+                history: [historyTxt],
+                participants: participants
+            });
+        }
     },
     'issues.update'(project, issue, title, description, tracker, priority, severity, dueDate, responsible) {
         check(project, String);

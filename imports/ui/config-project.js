@@ -11,6 +11,13 @@ Template.configProject.onCreated( function onCreated() {
 });
 
 Template.configProject.onRendered(function onRendered() {
+    this.$('#chk-open-issue-access').radiocheck();
+
+    if (thisProject.noIssueFilingRestrictions) {
+        this.$('#chk-open-issue-access').radiocheck('check');
+        this.$("#div-pm-access").addClass("disabled-div");
+    }
+
     this.$('#input-projname').val(thisProject.name);
     this.$('#select-admin').val(thisProject.admin);
     this.$('#txt-projdesc').val(thisProject.description);
@@ -37,7 +44,8 @@ Template.configProject.events({
             $('#input-projname').val(),
             $('#txt-projdesc').val(),
             $('#select-admin').val(),
-            thisProject.pmUsers);
+            thisProject.pmUsers,
+            thisProject.noIssueFilingRestrictions);
 
         target.set('projects');
     },
@@ -56,6 +64,15 @@ Template.configProject.events({
         if (index >= 0) {
             thisProject.pmUsers.splice(index, 1);
             pmUsersUpdated.set(true);
+        }
+    },
+    'change [id=chk-open-issue-access]'(event, template) {
+        if (event.target.checked) {
+            $("#div-pm-access").addClass("disabled-div");
+            thisProject.noIssueFilingRestrictions = true;
+        } else {
+            $("#div-pm-access").removeClass("disabled-div");
+            thisProject.noIssueFilingRestrictions = false;
         }
     }
 });

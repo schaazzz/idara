@@ -103,11 +103,14 @@ Template.issuePage.helpers({
         return nextStateName.get() == 'Closed';
     },
     disableIssueControls() {
-        var result = false;
+        var result = true;
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
 
-        if (Meteor.user().username != thisIssue.responsible) {
-            result = true;
+        if (Meteor.user().profile.isRoot
+            || (Meteor.user().username == thisProject.admin)
+            || (thisProject.pmUsers.indexOf(Meteor.user().username) >= 0)
+            || (Meteor.user().username == thisIssue.responsible)) {
+            result = false;
         }
 
         return result;
