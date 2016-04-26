@@ -4,80 +4,109 @@
             <h3 class="page-header">Warbler Control Panel</h3>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="panel-group" id="accordion">
-                <div class="panel panel-default">
 
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse-add-user"><span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add User</a>
-                        </h4>
-                    </div>
+    {{#if isRoot}}
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="panel-group" id="accordion">
+                    <div class="panel panel-default">
 
-                    <div id="collapse-add-user" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-xs-6">
-                                    <input type="text" id="input-username" class="form-control" placeholder="Username..."/>
+                        <!-- Panel for adding a new user -->
+                        <!-- ==================================================================================================== -->
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse-add-user"><span class="glyphicon glyphicon-menu-right"></span>&nbsp;&nbsp;Add User</a>
+                            </h4>
+                        </div>
+
+                        <div id="collapse-add-user" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="text" id="input-username" class="form-control" placeholder="Username..."/>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <input type="password" id="input-password" class="form-control" placeholder="Password..."/>
+                                    </div>
                                 </div>
-                                <div class="col-xs-6">
-                                    <input type="password" id="input-password" class="form-control" placeholder="Password..."/>
+                                <div class="row">
+                                    <div class="col-xs-6 pull-right">
+                                        <div class="bootstrap-switch-square pull-right">
+                                            <label for="switch-toggle-root">
+                                                Allow Root Privileges?&nbsp;&nbsp;&nbsp;
+                                                <input type="checkbox" data-toggle="switch" id="switch-toggle-root" data-off-color="danger" data-on-color="primary" data-on-text="<span class='fui-check'></span>" data-off-text="<span class='fui-cross'></span>" />
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-xs-6 pull-right">
-                                    <div class="bootstrap-switch-square pull-right">
-                                        <label for="switch-toggle-root">
-                                            Allow Root Privileges?&nbsp;&nbsp;&nbsp;
-                                            <input type="checkbox" data-toggle="switch" id="switch-toggle-root" data-off-color="danger" data-on-color="primary" data-on-text="<span class='fui-check'></span>" data-off-text="<span class='fui-cross'></span>" />
-                                        </label>
+                                <div class="row">
+                                    <div class="col-xs-4 center-block" style="float: none;">
+                                        <a href="#nolink" id="btn-add-user" class="btn btn-block btn-lg btn-primary">Add User</a>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-xs-4 center-block" style="float: none;">
-                                    <a href="#nolink" id="btn-add-user" class="btn btn-block btn-lg btn-primary">Add User</a>
+                        </div>
+
+                        <!-- Panel for adding a new project -->
+                        <!-- ==================================================================================================== -->
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse-add-project"><span class="glyphicon glyphicon-menu-right"></span>&nbsp;&nbsp;Add Project</a>
+                            </h4>
+                        </div>
+
+                        <div id="collapse-add-project" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="text" id="input-projname" class="form-control" placeholder="Project Name"/>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <select id="select-admin" class="form-control" data-toggle="select">
+                                            <option value="-1" selected>Select project admin</option>
+                                            {{#each user in users}}
+                                                <option value="{{user.username}}">{{user.username}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-top: 5px;">
+                                    <div class="col-xs-12">
+                                        <textarea id="txt-projdesc" class="form-control" placeholder="Project Description"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-top: 5px;">
+                                    <div class="col-xs-4 center-block" style="float: none;">
+                                        <a href="#nolink" id="btn-add-project" class="btn btn-block btn-lg btn-primary">Add Project</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse-add-project"><span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add Project</a>
-                        </h4>
-                    </div>
+                        <!-- Panel for adding a new workflow -->
+                        <!-- ==================================================================================================== -->
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse-add-workflow"><span class="glyphicon glyphicon-menu-right"></span>&nbsp;&nbsp;Add/Edit Workflows</a>
+                            </h4>
+                        </div>
 
-                    <div id="collapse-add-project" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-xs-6">
-                                    <input type="text" id="input-projname" class="form-control" placeholder="Project Name"/>
-                                </div>
-                                <div class="col-xs-6">
-                                    <select id="select-admin" class="form-control" data-toggle="select">
-                                        <option value="-1" selected>Select project admin</option>
-                                        {{#each user in users}}
-                                            <option value="{{user.username}}">{{user.username}}</option>
-                                        {{/each}}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row" style="padding-top: 5px;">
-                                <div class="col-xs-12">
-                                    <textarea id="txt-projdesc" class="form-control" placeholder="Project Description"></textarea>
-                                </div>
-                            </div>
-                            <div class="row" style="padding-top: 5px;">
-                                <div class="col-xs-4 center-block" style="float: none;">
-                                    <a href="#nolink" id="btn-add-project" class="btn btn-block btn-lg btn-primary">Add Project</a>
+                        <div id="collapse-add-workflow" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <ul style="list-style-type: none;">
+                                        <li><a href="#nolink"><span class="glyphicon glyphicon-edit"></span>&nbsp;&nbsp;&nbsp;Default</a></li>
+                                        <li><a href="#nolink"><span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;&nbsp;Add</a></li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    {{else}}
+        <h5 class="text-danger">You are not authorized to access this page</h5>
+    {{/if}}
 </template>

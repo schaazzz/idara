@@ -38,7 +38,7 @@ Template.body.helpers({
     showLoginForm() {
         return !loggedIn.get();
     },
-    targetTemplate(){
+    targetTemplate() {
         return target.get();
     }
 });
