@@ -2,8 +2,6 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Accounts } from 'meteor/accounts-base';
-import '../api/users';
-import '../api/projects';
 import './login';
 import './cpanel';
 import './home';
@@ -12,12 +10,14 @@ import './config-project';
 import './project-page';
 import './new-issue';
 import './issue-page';
+import './edit-workflow';
 import './body.html';
 
 loggedIn = new ReactiveVar(true);
 target = new ReactiveVar('home');
 activeProject = new ReactiveVar(null);
 editIssue = new ReactiveVar(false);
+workflow = new ReactiveVar('default');
 
 Template.body.onCreated(function onCreated() {
     this.state = new ReactiveDict();

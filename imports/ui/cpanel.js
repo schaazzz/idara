@@ -1,7 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Accounts } from 'meteor/accounts-base';
-import '../api/projects';
 import './cpanel.html';
 
 Template.controlPanel.onCreated(function onCreated() {
@@ -55,4 +54,8 @@ Template.controlPanel.events({
         $('#txt-projdesc').val('');
         $('#select-admin').val('-1');
     },
+    'click [id=a-default-workflow]'(event, template) {
+        workflow.set('default');
+        target.set('editWorkflow');
+    }
 });
