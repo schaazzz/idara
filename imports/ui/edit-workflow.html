@@ -8,11 +8,28 @@
             <a href="#nolink" id="btn-save-workflow" class="btn btn-lg btn-primary">Save Workflow</a>
         </div>
 
-        <div class="col-xs-3 pull-right" style= "padding-top: 10px;">
-            <a href="#nolink" id="btn-parse-workflow" class="btn btn-lg btn-primary">Parse Workflow</a>
+        <div class="col-xs-4 pull-right" style= "padding-top: 10px;">
+            <a href="#nolink" id="btn-parse-workflow" class="btn btn-lg btn-primary">Parse Workflow (Beta)</a>
         </div>
     </div>
 
-    <canvas id="canvas-workflow" height=1000 width=500></canvas>
+    <div class="modal fade" id="modal-workflow" tabindex="-1" role="dialog" aria-labelledby="modal-workflow-label">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title" id="modal-workflow-label">Parsed Workflow (Beta)</h5>
+                </div>
+
+                <div class="modal-body">
+                    <canvas id="canvas-workflow" width="500"></canvas>
+                </div>
+
+                <div class="modal-footer">
+                    <p class="pull-left text-primary">Workflow parsing successful..</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </template>

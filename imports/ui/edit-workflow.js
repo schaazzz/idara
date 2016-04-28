@@ -4,6 +4,7 @@ import { Accounts } from 'meteor/accounts-base';
 import './edit-workflow.html';
 
 var jsonEditor = null;
+var overallArcIndex = 1;
 
 defaultWorkflow =
     `{\"default\": [{
@@ -13,19 +14,19 @@ defaultWorkflow =
             \"stateName\":\"Review\",
             \"hasParticipants\": true,
             \"participantsRole\": \"Reviewer\",
-            \"nextState\": \"$single:Resolution\",
+            \"nextState\": \"$select:Resolution,Closed\",
             \"openComments\": true
         }, {
             \"stateName\":\"Resolution\",
             \"hasParticipants\": false,
             \"participantsRole\": null,
-            \"nextState\": \"$select:Test,Review,Closed\",
+            \"nextState\": \"$fixed:Test\",
             \"openComments\": false
         }, {
             \"stateName\":\"Test\",
             \"hasParticipants\": true,
             \"participantsRole\": \"Tester\",
-            \"nextState\": \"$fixed:Closed\",
+            \"nextState\": \"$select:Review,Closed\",
             \"openComments\": false
         }, {
             \"stateName\": \"Closed\",
@@ -50,7 +51,13 @@ Template.editWorkflow.onRendered(function onRendered() {
 
 Template.editWorkflow.events({
     'click [id=btn-parse-workflow]'(event, template) {
-        parsedWorkflow = JSON.parse(defaultWorkflow);
+        $('#modal-workflow').modal();
+
+        var parsedWorkflow = JSON.parse(defaultWorkflow);
+        var workflowCanvas = document.getElementById('canvas-workflow');
+        workflowCanvas.height = parsedWorkflow.default.length * 100;
+        var workflowCanvasCtx = workflowCanvas.getContext('2d');
+
         function roundedRect(ctx, x, y, width, height, radius, fill, stroke)
         {
             ctx.save();
@@ -76,14 +83,9 @@ Template.editWorkflow.events({
             ctx.restore();
         }
 
-        var workflowCanvas = document.getElementById('canvas-workflow');
-        var workflowCanvasCtx = workflowCanvas.getContext('2d');
-
         function doMouseDown(e) {
             var i = 0;
             var stateClicked = false;
-
-            console.log('-->', e.offsetX, e.offsetY);
 
             for (i = 0; i < parsedWorkflow.default.length; i++) {
                 if ((e.offsetX > parsedWorkflow.default[i].rectX)
@@ -96,14 +98,31 @@ Template.editWorkflow.events({
             }
 
             if (stateClicked && (parsedWorkflow.default[i].stateName != 'Open') && (parsedWorkflow.default[i].stateName != 'Closed')) {
-                workflowCanvasCtx.fillStyle = 'rgb(0, 0, 0)';
-                roundedRect(workflowCanvasCtx, e.offsetX, e.offsetY, 250, 100, 20, true, true);
-                workflowCanvasCtx.fillStyle = 'rgb(255, 255, 255)';
+                var txtArray = [];
+                var maxWidth = 0;
+
+                txtArray.push('hasParticipants: '+ parsedWorkflow.default[i].hasParticipants);
+                txtArray.push('participantsRole: '+ parsedWorkflow.default[i].participantsRole);
+                txtArray.push('nextState: '+ parsedWorkflow.default[i].nextState);
+                txtArray.push('openComments: '+ parsedWorkflow.default[i].openComments);
+
                 workflowCanvasCtx.font = '15px Arial';
-                workflowCanvasCtx.fillText('hasParticipants: '+ parsedWorkflow.default[i].hasParticipants, e.offsetX + 25, e.offsetY + 25);
-                workflowCanvasCtx.fillText('participantsRole: '+ parsedWorkflow.default[i].participantsRole, e.offsetX + 25, e.offsetY + 45);
-                workflowCanvasCtx.fillText('nextState: '+ parsedWorkflow.default[i].nextState, e.offsetX + 25, e.offsetY + 65);
-                workflowCanvasCtx.fillText('openComments: '+ parsedWorkflow.default[i].openComments, e.offsetX + 25, e.offsetY + 85);
+
+                for (var i = 0; i < txtArray.length; i++) {
+                    textWidth = workflowCanvasCtx.measureText(txtArray[i]).width;
+
+                    if (textWidth > maxWidth) {
+                        maxWidth = textWidth;
+                    }
+                }
+                workflowCanvasCtx.fillStyle = 'rgb(0, 0, 0)';
+                roundedRect(workflowCanvasCtx, e.offsetX, e.offsetY, maxWidth + 30, 100, 20, true, true);
+
+                workflowCanvasCtx.fillStyle = 'rgb(255, 255, 255)';
+                for (var i = 0; i < txtArray.length;i++) {
+                    workflowCanvasCtx.fillText(txtArray[i], e.offsetX + 15, e.offsetY + (25 + (i * 20)));
+                }
+
                 workflowCanvasCtx.stroke();
             }
         }
@@ -123,35 +142,103 @@ Template.editWorkflow.events({
             return i;
         }
 
-        function directConnection(index) {
-
-        }
-
         function connectStates(index) {
-            if (parsedWorkflow.default[i].singleNextState
-                && (parsedWorkflow.default[i].singleNextState == (index + 1))) {
+            function indirectConnection(i, j) {
+                if (parsedWorkflow.default[i].numIndirectConnections) {
+                    parsedWorkflow.default[i].numIndirectConnections++
+                } else {
+                    parsedWorkflow.default[i].numIndirectConnections = 1;
+                }
 
-                directConnection(index);
+                if (parsedWorkflow.default[j].numIndirectConnections) {
+                    parsedWorkflow.default[j].numIndirectConnections++
+                } else {
+                    parsedWorkflow.default[j].numIndirectConnections = 1;
+                }
+
+                var xN = parsedWorkflow.default[i].rectX + parsedWorkflow.default[i].rectWidth;
+                var yN = parsedWorkflow.default[i].rectY + ((parsedWorkflow.default[i].rectHeight) / (1 + parsedWorkflow.default[i].numIndirectConnections));
+
+                workflowCanvasCtx.moveTo(xN, yN);
+                workflowCanvasCtx.lineTo(xN + (25 * overallArcIndex), yN);
+
+                workflowCanvasCtx.moveTo(xN + (25 * overallArcIndex), yN);
+                yN = parsedWorkflow.default[j].rectY + ((parsedWorkflow.default[j].rectHeight) / (1 + parsedWorkflow.default[j].numIndirectConnections));
+                workflowCanvasCtx.lineTo(xN + (25 * overallArcIndex), yN);
+
+                workflowCanvasCtx.moveTo(xN + (25 * overallArcIndex), yN);
+                workflowCanvasCtx.lineTo(xN, yN);
+
+                workflowCanvasCtx.moveTo(xN, yN);
+                workflowCanvasCtx.lineTo(xN + 10, yN - 5);
+
+                workflowCanvasCtx.moveTo(xN, yN);
+                workflowCanvasCtx.lineTo(xN + 10, yN + 5);
+
+                workflowCanvasCtx.stroke();
+                overallArcIndex++;
+            }
+
+            function directConnection(index) {
+                var x0 = parsedWorkflow.default[index].rectX + (parsedWorkflow.default[index].rectWidth / 2);
+                var y0 = parsedWorkflow.default[index].rectY + parsedWorkflow.default[index].rectHeight;
+                var y1 = parsedWorkflow.default[index + 1].rectY;
+
+                /* Draw the line between the adjacent nodes */
+                workflowCanvasCtx.moveTo(x0, y0);
+                workflowCanvasCtx.lineTo(x0, y1);
+
+                /* Draw arrowhead */
+                workflowCanvasCtx.moveTo(x0, y1);
+                workflowCanvasCtx.lineTo(x0 - 5, y1 - 10);
+
+                workflowCanvasCtx.moveTo(x0, y1);
+                workflowCanvasCtx.lineTo(x0 + 5, y1 - 10);
+
+                /* Aaannddd... wait for iiiit... STROKE! */
+                workflowCanvasCtx.stroke();
+            }
+
+            if (parsedWorkflow.default[index].singleNextState) {
+                if(parsedWorkflow.default[index].singleNextState == (index + 1)) {
+                    directConnection(index);
+                } else {
+                    indirectConnection(index, parsedWorkflow.default[index].singleNextState);
+                }
+            }
+
+            if (parsedWorkflow.default[index].multipleNextStates) {
+                var statesArray = parsedWorkflow.default[index].multipleNextStates;
+                for (var i = 0; i < statesArray.length; i++) {
+                    if (statesArray[i] == index + 1) {
+                        directConnection(index);
+                    } else {
+                        indirectConnection(index, statesArray[i]);
+                    }
+                }
             }
         }
 
         function redraw() {
-            var overallArcIndex = 0;
-
+            overallArcIndex = 1;
             workflowCanvas.addEventListener('mousedown', doMouseDown, false);
             workflowCanvas.addEventListener('mouseup', doMouseUp, false);
             workflowCanvasCtx.strokeStyle = 'rgb(50, 50, 0)';
             workflowCanvasCtx.fillStyle = 'rgb(255, 0, 0)';
 
             for (var i = 0; i < parsedWorkflow.default.length; i++) {
-                roundedRect(workflowCanvasCtx, 10, 20 + (i * 150), 150, 100, 20, false, true);
+                roundedRect(workflowCanvasCtx, 100, 20 + (i * 90), 150, 65, 10, false, true);
                 workflowCanvasCtx.font = '20px Georgia';
-                workflowCanvasCtx.fillText(parsedWorkflow.default[i].stateName, 25, 40 + (i * 150) + 15);
+                workflowCanvasCtx.fillText(parsedWorkflow.default[i].stateName, 130, 20 + (i * 90) + 25);
                 workflowCanvasCtx.lineWidth = 2;
-                parsedWorkflow.default[i].rectX = 10;
-                parsedWorkflow.default[i].rectY = 20 + (i * 150);
+                parsedWorkflow.default[i].rectX = 100;
+                parsedWorkflow.default[i].rectY = 20 + (i * 90);
                 parsedWorkflow.default[i].rectWidth = 150;
-                parsedWorkflow.default[i].rectHeight = 100;
+                parsedWorkflow.default[i].rectHeight = 65;
+
+                if (parsedWorkflow.default[i].numIndirectConnections) {
+                    parsedWorkflow.default[i].numIndirectConnections = 0;
+                }
 
                 var nextState = parsedWorkflow.default[i].nextState;
                 var transition = nextState.split(':')[0];
@@ -167,52 +254,13 @@ Template.editWorkflow.events({
                     for (var j = 0; j < nextState.length; j++) {
                         parsedWorkflow.default[i].multipleNextStates.push(getStateIndex(nextState[j]));
                     }
+
                     parsedWorkflow.default[i].multipleNextStates.sort();
                 }
             }
 
             for (var i = 0; i < parsedWorkflow.default.length; i++) {
-                var x0 = parsedWorkflow.default[i].rectX + (parsedWorkflow.default[i].rectWidth / 2);
-                var y0 = parsedWorkflow.default[i].rectY + parsedWorkflow.default[i].rectHeight;
-
-                if ((i + 1) < parsedWorkflow.default.length) {
-                    var y1 = parsedWorkflow.default[i + 1].rectY;
-                    workflowCanvasCtx.moveTo(x0, y0);
-                    workflowCanvasCtx.lineTo(x0, y1);
-                    workflowCanvasCtx.moveTo(x0, y1);
-                    workflowCanvasCtx.lineTo(x0 - 5, y1 - 10);
-                    workflowCanvasCtx.moveTo(x0, y1);
-                    workflowCanvasCtx.lineTo(x0 + 5, y1 - 10);
-                    workflowCanvasCtx.stroke();
-                }
-
-                if (parsedWorkflow.default[i].multipleNextStates) {
-                    for (var j = 1; j < parsedWorkflow.default[i].multipleNextStates.length; j++) {
-                        k = parsedWorkflow.default[i].multipleNextStates[j];
-                        var xN = parsedWorkflow.default[i].rectX + parsedWorkflow.default[i].rectWidth;
-                        var yN = parsedWorkflow.default[i].rectY + (parsedWorkflow.default[i].rectHeight / 2);
-
-                        workflowCanvasCtx.moveTo(xN, yN);
-                        workflowCanvasCtx.lineTo(xN + (25 * (overallArcIndex + 1)), yN);
-                        workflowCanvasCtx.moveTo(xN + (25 * (overallArcIndex + 1)), yN);
-
-                        yN = parsedWorkflow.default[k].rectY + (parsedWorkflow.default[k].rectHeight / 2);
-
-                        workflowCanvasCtx.lineTo(xN + (25 * (overallArcIndex + 1)), yN);
-
-                        workflowCanvasCtx.moveTo(xN + (25 * (overallArcIndex + 1)), yN);
-                        workflowCanvasCtx.lineTo(xN, yN);
-
-                        workflowCanvasCtx.moveTo(xN, yN);
-                        workflowCanvasCtx.lineTo(xN + 10, yN - 5);
-
-                        workflowCanvasCtx.moveTo(xN, yN);
-                        workflowCanvasCtx.lineTo(xN + 10, yN + 5);
-
-                        workflowCanvasCtx.stroke();
-                        overallArcIndex++;
-                    }
-                }
+                connectStates(i);
             }
         }
 
