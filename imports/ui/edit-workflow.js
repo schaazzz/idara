@@ -13,13 +13,13 @@ defaultWorkflow =
             \"stateName\":\"Review\",
             \"hasParticipants\": true,
             \"participantsRole\": \"Reviewer\",
-            \"nextState\": \"$fixed:Resolution\",
+            \"nextState\": \"$single:Resolution\",
             \"openComments\": true
         }, {
             \"stateName\":\"Resolution\",
             \"hasParticipants\": false,
             \"participantsRole\": null,
-            \"nextState\": \"$select:Test,Closed\",
+            \"nextState\": \"$select:Test,Review,Closed\",
             \"openComments\": false
         }, {
             \"stateName\":\"Test\",
@@ -83,6 +83,8 @@ Template.editWorkflow.events({
             var i = 0;
             var stateClicked = false;
 
+            console.log('-->', e.offsetX, e.offsetY);
+
             for (i = 0; i < parsedWorkflow.default.length; i++) {
                 if ((e.offsetX > parsedWorkflow.default[i].rectX)
                     && (e.offsetX < (parsedWorkflow.default[i].rectX + parsedWorkflow.default[i].rectWidth))
@@ -121,19 +123,33 @@ Template.editWorkflow.events({
             return i;
         }
 
+        function directConnection(index) {
+
+        }
+
+        function connectStates(index) {
+            if (parsedWorkflow.default[i].singleNextState
+                && (parsedWorkflow.default[i].singleNextState == (index + 1))) {
+
+                directConnection(index);
+            }
+        }
+
         function redraw() {
+            var overallArcIndex = 0;
+
             workflowCanvas.addEventListener('mousedown', doMouseDown, false);
             workflowCanvas.addEventListener('mouseup', doMouseUp, false);
             workflowCanvasCtx.strokeStyle = 'rgb(50, 50, 0)';
             workflowCanvasCtx.fillStyle = 'rgb(255, 0, 0)';
 
             for (var i = 0; i < parsedWorkflow.default.length; i++) {
-                roundedRect(workflowCanvasCtx, 10, 20 + (i * 175), 150, 100, 20, false, true);
+                roundedRect(workflowCanvasCtx, 10, 20 + (i * 150), 150, 100, 20, false, true);
                 workflowCanvasCtx.font = '20px Georgia';
-                workflowCanvasCtx.fillText(parsedWorkflow.default[i].stateName, 25, 40 + (i * 175) + 15);
+                workflowCanvasCtx.fillText(parsedWorkflow.default[i].stateName, 25, 40 + (i * 150) + 15);
                 workflowCanvasCtx.lineWidth = 2;
                 parsedWorkflow.default[i].rectX = 10;
-                parsedWorkflow.default[i].rectY = 20 + (i * 175);
+                parsedWorkflow.default[i].rectY = 20 + (i * 150);
                 parsedWorkflow.default[i].rectWidth = 150;
                 parsedWorkflow.default[i].rectHeight = 100;
 
@@ -151,6 +167,7 @@ Template.editWorkflow.events({
                     for (var j = 0; j < nextState.length; j++) {
                         parsedWorkflow.default[i].multipleNextStates.push(getStateIndex(nextState[j]));
                     }
+                    parsedWorkflow.default[i].multipleNextStates.sort();
                 }
             }
 
@@ -162,6 +179,10 @@ Template.editWorkflow.events({
                     var y1 = parsedWorkflow.default[i + 1].rectY;
                     workflowCanvasCtx.moveTo(x0, y0);
                     workflowCanvasCtx.lineTo(x0, y1);
+                    workflowCanvasCtx.moveTo(x0, y1);
+                    workflowCanvasCtx.lineTo(x0 - 5, y1 - 10);
+                    workflowCanvasCtx.moveTo(x0, y1);
+                    workflowCanvasCtx.lineTo(x0 + 5, y1 - 10);
                     workflowCanvasCtx.stroke();
                 }
 
@@ -172,33 +193,27 @@ Template.editWorkflow.events({
                         var yN = parsedWorkflow.default[i].rectY + (parsedWorkflow.default[i].rectHeight / 2);
 
                         workflowCanvasCtx.moveTo(xN, yN);
-                        workflowCanvasCtx.lineTo(xN + 75, yN);
-                        workflowCanvasCtx.moveTo(xN + 75, yN);
+                        workflowCanvasCtx.lineTo(xN + (25 * (overallArcIndex + 1)), yN);
+                        workflowCanvasCtx.moveTo(xN + (25 * (overallArcIndex + 1)), yN);
 
                         yN = parsedWorkflow.default[k].rectY + (parsedWorkflow.default[k].rectHeight / 2);
 
-                        workflowCanvasCtx.lineTo(xN + 75, yN);
+                        workflowCanvasCtx.lineTo(xN + (25 * (overallArcIndex + 1)), yN);
 
-                        workflowCanvasCtx.moveTo(xN + 75, yN);
+                        workflowCanvasCtx.moveTo(xN + (25 * (overallArcIndex + 1)), yN);
                         workflowCanvasCtx.lineTo(xN, yN);
+
+                        workflowCanvasCtx.moveTo(xN, yN);
+                        workflowCanvasCtx.lineTo(xN + 10, yN - 5);
+
+                        workflowCanvasCtx.moveTo(xN, yN);
+                        workflowCanvasCtx.lineTo(xN + 10, yN + 5);
+
                         workflowCanvasCtx.stroke();
+                        overallArcIndex++;
                     }
                 }
             }
-            //
-            // xX = parsedWorkflow.default[2].rectX + parsedWorkflow.default[2].rectWidth;
-            // yY = parsedWorkflow.default[2].rectY + (parsedWorkflow.default[2].rectHeight / 2);
-            // workflowCanvasCtx.moveTo(xX, yY);
-            // workflowCanvasCtx.lineTo(xX + 75, yY);
-            // workflowCanvasCtx.moveTo(xX + 75, yY);
-            //
-            // yY = parsedWorkflow.default[4].rectY + (parsedWorkflow.default[4].rectHeight / 2);
-            //
-            // workflowCanvasCtx.lineTo(xX + 75, yY);
-            //
-            // workflowCanvasCtx.moveTo(xX + 75, yY);
-            // workflowCanvasCtx.lineTo(xX, yY);
-            // workflowCanvasCtx.stroke();
         }
 
         redraw();
