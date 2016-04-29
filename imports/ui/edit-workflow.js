@@ -22,6 +22,25 @@ var newStateTemplate = {
     }]
 };
 
+function checkWorkflow() {
+    var workflow = null;
+
+    try {
+        workflow = JSON.parse(jsonEditor.getValue());
+    } catch (error) {
+        console.log('Invalid JSON!');
+    }
+
+    if (workflow.states[0].stateName != 'Open') {
+        console.log('First state is not \"Open\"!');
+    }
+
+    if (workflow.states[workflow.states.length - 1].stateName != 'Closed') {
+        console.log('Last state is not \"Closed\"!');
+    }
+
+}
+
 Template.editWorkflow.onCreated(function onCreated() {
     if (newWorkflow.get()) {
         thisWorkflow = newStateTemplate;
@@ -59,11 +78,12 @@ Template.editWorkflow.helpers({
 
 Template.editWorkflow.events({
     'click [id=btn-save-workflow]'(event, template) {
-        if (newWorkflow.get()) {
-            Meteor.call('workflows.insert', thisWorkflow);
-        } else {
-            Meteor.call('workflows.update', thisWorkflowSavedId, thisWorkflow);
-        }
+        checkWorkflow();
+        // if (newWorkflow.get()) {
+        //     Meteor.call('workflows.insert', thisWorkflow);
+        // } else {
+        //     Meteor.call('workflows.update', thisWorkflowSavedId, thisWorkflow);
+        // }
     },
     'click [id=btn-parse-workflow]'(event, template) {
         thisWorkflow = JSON.parse(jsonEditor.getValue());
