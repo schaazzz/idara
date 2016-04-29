@@ -12,7 +12,7 @@
                     <div class="panel panel-default">
 
                         <!-- Panel for adding a new user -->
-                        <!-- ==================================================================================================== -->
+                        <!-- ====================================================================== -->
                         <div class="panel-heading">
                             <h4 class="panel-title">
                                 <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse-add-user"><span class="glyphicon glyphicon-menu-right"></span>&nbsp;&nbsp;Add User</a>
@@ -48,7 +48,7 @@
                         </div>
 
                         <!-- Panel for adding a new project -->
-                        <!-- ==================================================================================================== -->
+                        <!-- ====================================================================== -->
                         <div class="panel-heading">
                             <h4 class="panel-title">
                                 <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse-add-project"><span class="glyphicon glyphicon-menu-right"></span>&nbsp;&nbsp;Add Project</a>
@@ -84,7 +84,7 @@
                         </div>
 
                         <!-- Panel for adding a new workflow -->
-                        <!-- ==================================================================================================== -->
+                        <!-- ====================================================================== -->
                         <div class="panel-heading">
                             <h4 class="panel-title">
                                 <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse-add-workflow"><span class="glyphicon glyphicon-menu-right"></span>&nbsp;&nbsp;Add/Edit Workflows</a>
@@ -95,8 +95,20 @@
                             <div class="panel-body">
                                 <div class="row">
                                     <ul style="list-style-type: none;">
-                                        <li><a id="a-default-workflow" href="#nolink"><span class="glyphicon glyphicon-edit"></span>&nbsp;&nbsp;&nbsp;Default</a></li>
-                                        <li><a href="#nolink"><span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;&nbsp;Add</a></li>
+                                        {{#each workflow in workflows}}
+                                            <li>
+                                                <a name="a-workflow-edit" id="{{workflow.name}}" href="#nolink">
+                                                    <span class="glyphicon glyphicon-edit"></span>
+                                                    &nbsp;&nbsp;&nbsp;{{workflow.name}}
+                                                </a>
+                                            </li>
+                                        {{/each}}
+                                        <li>
+                                            <a id="a-workflow-add" href="#nolink">
+                                                <span class="glyphicon glyphicon-plus"></span>
+                                                &nbsp;&nbsp;&nbsp;Add
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>

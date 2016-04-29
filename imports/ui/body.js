@@ -18,6 +18,8 @@ target = new ReactiveVar('home');
 activeProject = new ReactiveVar(null);
 editIssue = new ReactiveVar(false);
 workflow = new ReactiveVar('default');
+activeWorkflow = new ReactiveVar(null);
+newWorkflow = new ReactiveVar(false);
 
 Template.body.onCreated(function onCreated() {
     this.state = new ReactiveDict();

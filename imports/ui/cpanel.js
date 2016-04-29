@@ -1,9 +1,44 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Accounts } from 'meteor/accounts-base';
+import { Workflows } from '../api/workflows';
 import './cpanel.html';
 
+var defaultWorkflow =
+`{
+    \"name\": \"default\",
+    \"states\": [{
+        \"stateName\": \"Open\",
+        \"nextState\": \"$fixed:Review\"
+    }, {
+        \"stateName\":\"Review\",
+        \"hasParticipants\": true,
+        \"participantsRole\": \"Reviewer\",
+        \"nextState\": \"$select:Resolution,Closed\",
+        \"openComments\": true
+    }, {
+        \"stateName\":\"Resolution\",
+        \"hasParticipants\": false,
+        \"participantsRole\": null,
+        \"nextState\": \"$fixed:Test\",
+        \"openComments\": false
+    }, {
+        \"stateName\":\"Test\",
+        \"hasParticipants\": true,
+        \"participantsRole\": \"Tester\",
+        \"nextState\": \"$select:Review,Closed\",
+        \"openComments\": false
+    }, {
+        \"stateName\": \"Closed\",
+        \"nextState\": "$none"
+    }]
+}`;
+
 Template.controlPanel.onCreated(function onCreated() {
+    if (Workflows.findOne({'name': 'default'})) {
+    } else {
+        Meteor.call('workflows.insert', JSON.parse(defaultWorkflow));
+    }
 });
 
 Template.controlPanel.onRendered(function onRendered() {
@@ -28,6 +63,9 @@ Template.controlPanel.onRendered(function onRendered() {
 });
 
 Template.controlPanel.helpers({
+    workflows() {
+        return Workflows.find({});
+    },
     users() {
         return Meteor.users.find({});
     },
@@ -54,8 +92,14 @@ Template.controlPanel.events({
         $('#txt-projdesc').val('');
         $('#select-admin').val('-1');
     },
-    'click [id=a-default-workflow]'(event, template) {
-        workflow.set('default');
+    'click [id=a-workflow-add]'(event, template) {
+        newWorkflow.set(true);
+        activeWorkflow.set(null);
+        target.set('editWorkflow');
+    },
+    'click [name=a-workflow-edit]'(event, template) {
+        newWorkflow.set(false);
+        activeWorkflow.set(event.target.id);
         target.set('editWorkflow');
     }
 });
