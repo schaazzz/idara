@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
-import {Projects} from './projects';
+import { Projects } from './projects';
 
 export const Issues = new Mongo.Collection('issues');
 
@@ -22,7 +22,7 @@ Meteor.methods({
             || thisProject.noIssueFilingRestrictions
             || (Meteor.user().username == thisProject.admin)
             || (thisProject.pmUsers.indexOf(Meteor.user().username) >= 0)) {
-                
+
             var workflow = thisProject.workflow;
             var participants = [];
 

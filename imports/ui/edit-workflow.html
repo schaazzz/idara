@@ -22,7 +22,12 @@
                 </div>
 
                 <div class="modal-footer">
-                    <p class="pull-left text-primary">Workflow parsing successful..</p>
+                    {{#if workflowParsing.pass}}
+                        <p class="pull-left text-primary">Workflow parsing successful..</p>
+                    {{else}}
+                        <p class="pull-left text-danger">Workflow parsing failed..</p>
+                        <p class="pull-left text-danger">{{workflowParsing.msg}}</p>
+                    {{/if}}
                 </div>
             </div>
         </div>

@@ -61,11 +61,21 @@
                                     <div class="col-xs-6">
                                         <input type="text" id="input-projname" class="form-control" placeholder="Project Name"/>
                                     </div>
+                                </div>
+                                <div class="row" style="padding-top: 5px;">
                                     <div class="col-xs-6">
                                         <select id="select-admin" class="form-control" data-toggle="select">
                                             <option value="-1" selected>Select project admin</option>
                                             {{#each user in users}}
-                                                <option value="{{user.username}}">{{user.username}}</option>
+                                            <option value="{{user.username}}">{{user.username}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <select id="select-workflow" class="form-control" data-toggle="select">
+                                            <option value="-1" selected>Select project workflow</option>
+                                            {{#each workflow in workflows}}
+                                            <option value="{{workflow.name}}">{{workflow.name}}</option>
                                             {{/each}}
                                         </select>
                                     </div>
@@ -98,14 +108,14 @@
                                         {{#each workflow in workflows}}
                                             <li>
                                                 <a name="a-workflow-edit" id="{{workflow.name}}" href="#nolink">
-                                                    <span class="glyphicon glyphicon-edit"></span>
+                                                    <span id="{{workflow.name}}" class="glyphicon glyphicon-edit"></span>
                                                     &nbsp;&nbsp;&nbsp;{{workflow.name}}
                                                 </a>
                                             </li>
                                         {{/each}}
                                         <li>
                                             <a id="a-workflow-add" href="#nolink">
-                                                <span class="glyphicon glyphicon-plus"></span>
+                                                <span id="a-workflow-add" class="glyphicon glyphicon-plus"></span>
                                                 &nbsp;&nbsp;&nbsp;Add
                                             </a>
                                         </li>

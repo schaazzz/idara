@@ -93,18 +93,20 @@
                 </div>
             </div>
 
-            <div id="div-state-complete" class="row" {{isClosed.miscInfo}}>
-                <div class="col-xs-12">
-                    <label class="checkbox">
-                        {{#if haveAllParticipantsCommented}}
-                            All {{currentState.participantsRole}}s have commented, mark {{currentState.stateName}} complete?
-                        {{else}}
-                            Waiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
-                        {{/if}}
-                        <input type="checkbox" value="" id="chk-state-complete" data-toggle="checkbox" disabled={{not haveAllParticipantsCommented}}>{{test}}
-                    </label>
+            {{#if currentState.hasParticipants}}
+                <div id="div-state-complete" class="row" {{isClosed.miscInfo}}>
+                    <div class="col-xs-12">
+                        <label class="checkbox">
+                            {{#if haveAllParticipantsCommented}}
+                                All {{currentState.participantsRole}}s have commented, mark {{currentState.stateName}} complete?
+                            {{else}}
+                                Waiting for comments from the issue-responsible and {{currentState.participantsRole}}s!
+                            {{/if}}
+                            <input type="checkbox" value="" id="chk-state-complete" data-toggle="checkbox" disabled={{not haveAllParticipantsCommented}}>{{test}}
+                        </label>
+                    </div>
                 </div>
-            </div>
+            {{/if}}
         {{/if}}
     </div>
 

@@ -85,12 +85,14 @@ Template.controlPanel.events({
         const projectName = $('#input-projname').val();
         const projectDescription = $('#txt-projdesc').val();
         const projectAdmin = $('#select-admin').val();
+        const projectWorkflow = $('#select-workflow').val();
 
-        Meteor.call('projects.insert', projectName, projectDescription, projectAdmin);
+        Meteor.call('projects.insert', projectName, projectDescription, projectAdmin, projectWorkflow);
 
         $('#input-projname').val('');
         $('#txt-projdesc').val('');
         $('#select-admin').val('-1');
+        $('#select-workflow').val('-1');
     },
     'click [id=a-workflow-add]'(event, template) {
         newWorkflow.set(true);

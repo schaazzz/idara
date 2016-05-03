@@ -86,7 +86,7 @@ Template.issuePage.helpers({
             var transitionMethod = nextState.split(':')[0];
             nextStateName.set(nextState.split(':')[1]);
 
-            if (transitionMethod == '$prompt') {
+            if (transitionMethod == '$select') {
                 transition.prompt = true;
                 transition.nextStateSingle = null;
                 transition.nextStateList = nextStateName.get().split(',');
@@ -185,6 +185,7 @@ Template.issuePage.helpers({
         var result = false;
         if ((workflow[thisIssue.stateIndex].stateName != 'Open') &&
             (workflow[thisIssue.stateIndex].stateName != 'Closed') &&
+            workflow[thisIssue.stateIndex].hasParticipants &&
             !unblockStateTransition.get()) {
             result = true;
         }

@@ -9,6 +9,7 @@ var overallArcIndex = 1;
 var thisWorkflow = null;
 var thisWorkflowSavedId = null;
 var workflowName = new ReactiveVar(null);
+var parsingResult = new ReactiveVar({true, null});
 var newStateTemplate = {
     "name": "<workflow_name>",
     "states": [{
@@ -22,23 +23,83 @@ var newStateTemplate = {
     }]
 };
 
-function checkWorkflow() {
-    var workflow = null;
+function getStateIndex(states, stateName) {
+    var i = 0;
+    for (i = 0; i < states.length; i++) {
+        if (states[i].stateName == stateName) {
+            break;
+        }
+    }
+    return i;
+}
 
+function parseNextState(states, index) {
+    var result  = {};
+
+    nextState = states[index].nextState;
+    transition = nextState.split(':')[0];
+    nextState = nextState.split(':')[1];
+    if (transition == '$fixed') {
+        result.singleNextState = getStateIndex(states, nextState);
+    } else if (transition == '$select') {
+        var nextState = nextState.replace(new RegExp(' ', 'g'), '').split(',');
+        var nextStateList = []
+        for (var i = 0; i < nextState.length; i++) {
+            nextStateList.push(getStateIndex(states, nextState[i]));
+        }
+        nextStateList.sort(function (a, b) { return (a-b); });
+        result.multipleNextStates = nextStateList;
+    }
+
+    return result;
+}
+
+function checkWorkflow(workflow) {
+    result = {pass: true, msg: null};
     try {
         workflow = JSON.parse(jsonEditor.getValue());
     } catch (error) {
-        console.log('Invalid JSON!');
+        result.pass = false;
+        result.msg = 'Invalid JSON!';
     }
 
     if (workflow.states[0].stateName != 'Open') {
-        console.log('First state is not \"Open\"!');
+        result.pass = false;
+        result.msg = 'First state is not \"Open\"!';
     }
 
     if (workflow.states[workflow.states.length - 1].stateName != 'Closed') {
-        console.log('Last state is not \"Closed\"!');
+        result.pass = false;
+        result.msg = 'Last state is not \"Closed\"!';
     }
 
+    var nextState = parseNextState(workflow.states, 0);
+    if (nextState.singleNextState != 1) {
+        result.pass = false;
+        result.msg = 'The \"Open\" state must be directly connected to the next adjacent node!';
+    }
+
+    nextState = parseNextState(workflow.states, (workflow.states.length - 2));
+    if (nextState.singleNextState) {
+        if (nextState.singleNextState != (workflow.states.length - 1)) {
+            result.pass = false;
+            result.msg = 'The \"Closed\" state must be directly connected to the previous adjacent node!';
+        }
+    }
+
+    if (nextState.multipleNextStates) {
+        if (nextState.multipleNextStates.indexOf(workflow.states.length - 1) < 0) {
+            result.pass = false;
+            result.msg = 'The \"Closed\" state must be directly connected to the previous adjacent node!';
+        }
+    }
+
+    if (workflow.states.length < 3) {
+        result.pass = false;
+        result.msg = 'You need to define atleast one \"working\" state!';
+    }
+
+    return result;
 }
 
 Template.editWorkflow.onCreated(function onCreated() {
@@ -73,28 +134,32 @@ Template.editWorkflow.onRendered(function onRendered() {
 Template.editWorkflow.helpers({
     workflowName() {
         return workflowName.get();
+    },
+    workflowParsing() {
+        return parsingResult.get();
     }
 });
 
 Template.editWorkflow.events({
     'click [id=btn-save-workflow]'(event, template) {
-        checkWorkflow();
-        // if (newWorkflow.get()) {
-        //     Meteor.call('workflows.insert', thisWorkflow);
-        // } else {
-        //     Meteor.call('workflows.update', thisWorkflowSavedId, thisWorkflow);
-        // }
+        var workflow = JSON.parse(jsonEditor.getValue());
+        checkWorkflow(workflow);
+        if (newWorkflow.get()) {
+            Meteor.call('workflows.insert', workflow);
+        } else {
+            Meteor.call('workflows.update', thisWorkflowSavedId, workflow);
+        }
     },
     'click [id=btn-parse-workflow]'(event, template) {
-        thisWorkflow = JSON.parse(jsonEditor.getValue());
-        workflowName.set(thisWorkflow.name);
+        var workflow = JSON.parse(jsonEditor.getValue());
+        workflowName.set(workflow.name);
 
         $('#modal-workflow').modal();
 
         var workflowCanvas = document.getElementById('canvas-workflow');
         var workflowCanvasCtx = workflowCanvas.getContext('2d');
-
-        workflowCanvas.height = thisWorkflow.states.length * 100;
+        workflowCanvasCtx.clearRect(0, 0, workflowCanvas.width, workflowCanvas.height);
+        workflowCanvas.height = 50;
 
         function roundedRect(ctx, x, y, width, height, radius, fill, stroke)
         {
@@ -125,24 +190,24 @@ Template.editWorkflow.events({
             var i = 0;
             var stateClicked = false;
 
-            for (i = 0; i < thisWorkflow.states.length; i++) {
-                if ((e.offsetX > thisWorkflow.states[i].rectX)
-                    && (e.offsetX < (thisWorkflow.states[i].rectX + thisWorkflow.states[i].rectWidth))
-                    && (e.offsetY > thisWorkflow.states[i].rectY)
-                    && (e.offsetY < (thisWorkflow.states[i].rectY + thisWorkflow.states[i].rectHeight))) {
+            for (i = 0; i < workflow.states.length; i++) {
+                if ((e.offsetX > workflow.states[i].rectX)
+                    && (e.offsetX < (workflow.states[i].rectX + workflow.states[i].rectWidth))
+                    && (e.offsetY > workflow.states[i].rectY)
+                    && (e.offsetY < (workflow.states[i].rectY + workflow.states[i].rectHeight))) {
                         stateClicked = true;
                         break;
                     }
             }
 
-            if (stateClicked && (thisWorkflow.states[i].stateName != 'Open') && (thisWorkflow.states[i].stateName != 'Closed')) {
+            if (stateClicked && (workflow.states[i].stateName != 'Open') && (workflow.states[i].stateName != 'Closed')) {
                 var txtArray = [];
                 var maxWidth = 0;
 
-                txtArray.push('hasParticipants: '+ thisWorkflow.states[i].hasParticipants);
-                txtArray.push('participantsRole: '+ thisWorkflow.states[i].participantsRole);
-                txtArray.push('nextState: '+ thisWorkflow.states[i].nextState);
-                txtArray.push('openComments: '+ thisWorkflow.states[i].openComments);
+                txtArray.push('hasParticipants: '+ workflow.states[i].hasParticipants);
+                txtArray.push('participantsRole: '+ workflow.states[i].participantsRole);
+                txtArray.push('nextState: '+ workflow.states[i].nextState);
+                txtArray.push('openComments: '+ workflow.states[i].openComments);
 
                 workflowCanvasCtx.font = '15px Arial';
 
@@ -170,38 +235,28 @@ Template.editWorkflow.events({
             redraw();
         }
 
-        function getStateIndex(stateName) {
-            var i = 0;
-            for (i = 0; i < thisWorkflow.states.length; i++) {
-                if (thisWorkflow.states[i].stateName == stateName) {
-                    break;
-                }
-            }
-            return i;
-        }
-
         function connectStates(index) {
             function indirectConnection(i, j) {
-                if (thisWorkflow.states[i].numIndirectConnections) {
-                    thisWorkflow.states[i].numIndirectConnections++
+                if (workflow.states[i].numIndirectConnections) {
+                    workflow.states[i].numIndirectConnections++
                 } else {
-                    thisWorkflow.states[i].numIndirectConnections = 1;
+                    workflow.states[i].numIndirectConnections = 1;
                 }
 
-                if (thisWorkflow.states[j].numIndirectConnections) {
-                    thisWorkflow.states[j].numIndirectConnections++
+                if (workflow.states[j].numIndirectConnections) {
+                    workflow.states[j].numIndirectConnections++
                 } else {
-                    thisWorkflow.states[j].numIndirectConnections = 1;
+                    workflow.states[j].numIndirectConnections = 1;
                 }
 
-                var xN = thisWorkflow.states[i].rectX + thisWorkflow.states[i].rectWidth;
-                var yN = thisWorkflow.states[i].rectY + ((thisWorkflow.states[i].rectHeight) / (1 + thisWorkflow.states[i].numIndirectConnections));
+                var xN = workflow.states[i].rectX + workflow.states[i].rectWidth;
+                var yN = workflow.states[i].rectY + ((workflow.states[i].rectHeight) / (1 + workflow.states[i].numIndirectConnections));
 
                 workflowCanvasCtx.moveTo(xN, yN);
                 workflowCanvasCtx.lineTo(xN + (25 * overallArcIndex), yN);
 
                 workflowCanvasCtx.moveTo(xN + (25 * overallArcIndex), yN);
-                yN = thisWorkflow.states[j].rectY + ((thisWorkflow.states[j].rectHeight) / (1 + thisWorkflow.states[j].numIndirectConnections));
+                yN = workflow.states[j].rectY + ((workflow.states[j].rectHeight) / (1 + workflow.states[j].numIndirectConnections));
                 workflowCanvasCtx.lineTo(xN + (25 * overallArcIndex), yN);
 
                 workflowCanvasCtx.moveTo(xN + (25 * overallArcIndex), yN);
@@ -218,9 +273,9 @@ Template.editWorkflow.events({
             }
 
             function directConnection(index) {
-                var x0 = thisWorkflow.states[index].rectX + (thisWorkflow.states[index].rectWidth / 2);
-                var y0 = thisWorkflow.states[index].rectY + thisWorkflow.states[index].rectHeight;
-                var y1 = thisWorkflow.states[index + 1].rectY;
+                var x0 = workflow.states[index].rectX + (workflow.states[index].rectWidth / 2);
+                var y0 = workflow.states[index].rectY + workflow.states[index].rectHeight;
+                var y1 = workflow.states[index + 1].rectY;
 
                 /* Draw the line between the adjacent nodes */
                 workflowCanvasCtx.moveTo(x0, y0);
@@ -237,16 +292,16 @@ Template.editWorkflow.events({
                 workflowCanvasCtx.stroke();
             }
 
-            if (thisWorkflow.states[index].singleNextState) {
-                if(thisWorkflow.states[index].singleNextState == (index + 1)) {
+            if (workflow.states[index].singleNextState) {
+                if(workflow.states[index].singleNextState == (index + 1)) {
                     directConnection(index);
                 } else {
-                    indirectConnection(index, thisWorkflow.states[index].singleNextState);
+                    indirectConnection(index, workflow.states[index].singleNextState);
                 }
             }
 
-            if (thisWorkflow.states[index].multipleNextStates) {
-                var statesArray = thisWorkflow.states[index].multipleNextStates;
+            if (workflow.states[index].multipleNextStates) {
+                var statesArray = workflow.states[index].multipleNextStates;
                 for (var i = 0; i < statesArray.length; i++) {
                     if (statesArray[i] == index + 1) {
                         directConnection(index);
@@ -258,46 +313,54 @@ Template.editWorkflow.events({
         }
 
         function redraw() {
+            parsingResult.set(checkWorkflow(workflow));
+
+            if(!parsingResult.get().pass) {
+                return;
+            }
+
+            workflowCanvas.height = workflow.states.length * 100;
+
             overallArcIndex = 1;
             workflowCanvas.addEventListener('mousedown', doMouseDown, false);
             workflowCanvas.addEventListener('mouseup', doMouseUp, false);
             workflowCanvasCtx.strokeStyle = 'rgb(0, 0, 0)';
             workflowCanvasCtx.fillStyle = 'rgb(255, 0, 0)';
 
-            for (var i = 0; i < thisWorkflow.states.length; i++) {
+            for (var i = 0; i < workflow.states.length; i++) {
                 roundedRect(workflowCanvasCtx, 100, 20 + (i * 90), 250, 65, 10, false, true);
                 workflowCanvasCtx.font = '20px Georgia';
-                workflowCanvasCtx.fillText(thisWorkflow.states[i].stateName, 130, 20 + (i * 90) + 25);
+                workflowCanvasCtx.fillText(workflow.states[i].stateName, 130, 20 + (i * 90) + 25);
                 workflowCanvasCtx.lineWidth = 2;
-                thisWorkflow.states[i].rectX = 100;
-                thisWorkflow.states[i].rectY = 20 + (i * 90);
-                thisWorkflow.states[i].rectWidth = 250;
-                thisWorkflow.states[i].rectHeight = 65;
+                workflow.states[i].rectX = 100;
+                workflow.states[i].rectY = 20 + (i * 90);
+                workflow.states[i].rectWidth = 250;
+                workflow.states[i].rectHeight = 65;
 
-                if (thisWorkflow.states[i].numIndirectConnections) {
-                    thisWorkflow.states[i].numIndirectConnections = 0;
+                if (workflow.states[i].numIndirectConnections) {
+                    workflow.states[i].numIndirectConnections = 0;
                 }
 
-                var nextState = thisWorkflow.states[i].nextState;
+                var nextState = workflow.states[i].nextState;
                 var transition = nextState.split(':')[0];
                 nextState = nextState.split(':')[1];
 
                 if (transition == '$fixed') {
-                    thisWorkflow.states[i].singleNextState = getStateIndex(nextState);
+                    workflow.states[i].singleNextState = getStateIndex(workflow.states, nextState);
                 }
 
                 if (transition == '$select') {
-                    thisWorkflow.states[i].multipleNextStates = [];
+                    workflow.states[i].multipleNextStates = [];
                     nextState = nextState.replace(' ', '').split(',');
                     for (var j = 0; j < nextState.length; j++) {
-                        thisWorkflow.states[i].multipleNextStates.push(getStateIndex(nextState[j]));
+                        workflow.states[i].multipleNextStates.push(getStateIndex(workflow.states, nextState[j]));
                     }
 
-                    thisWorkflow.states[i].multipleNextStates.sort();
+                    workflow.states[i].multipleNextStates.sort();
                 }
             }
 
-            for (var i = 0; i < thisWorkflow.states.length; i++) {
+            for (var i = 0; i < workflow.states.length; i++) {
                 connectStates(i);
             }
         }
