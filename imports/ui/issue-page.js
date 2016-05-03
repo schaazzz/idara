@@ -113,7 +113,19 @@ Template.issuePage.helpers({
             result = false;
         }
 
-        return result;
+        return (result);
+    },
+    hideStateCheckbox() {
+        var result = '';
+        var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
+        var thisProject = Projects.findOne({'name': activeProject.get()});
+        var workflow = thisProject.workflow;
+
+        if ((workflow[thisIssue.stateIndex].stateName == 'Closed') || !workflow[thisIssue.stateIndex].hasParticipants) {
+            result = 'hidden';
+        }
+
+        return (result);
     },
     isClosed() {
         var result = {status: false, miscInfo: ''};
@@ -125,10 +137,9 @@ Template.issuePage.helpers({
             $('#div-state-complete').addClass('hidden');
             result.status = true;
             result.miscInfo = 'hidden';
-            console.log('eee');
         }
 
-        return result;
+        return (result);
     },
     currentState() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
