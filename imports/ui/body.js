@@ -36,6 +36,10 @@ Template.registerHelper("not", function(condition) {
     return !condition;
 });
 
+Template.registerHelper("eq", function(arg0, arg1) {
+    return (arg0 == arg1);
+});
+
 Template.body.helpers({
     showLoginForm() {
         return !loggedIn.get();

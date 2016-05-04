@@ -9,6 +9,8 @@ var tabChanged = new ReactiveVar(false);
 var activeTab = new ReactiveVar('');
 var nextStateName = new ReactiveVar('');
 var currentState = new ReactiveVar(null);
+var stateChangeMsg = new ReactiveVar(null);
+var newStateChangeMsg = new ReactiveVar(null);
 var unblockStateTransition = new ReactiveVar(false);
 
 Template.issuePage.onCreated(function onCreated () {
@@ -227,6 +229,9 @@ Template.issuePage.helpers({
 
         return result;
     },
+    stateChangeMsg() {
+        return stateChangeMsg.get();
+    },
     subStateMsg() {
         var msg = '';
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
@@ -276,28 +281,41 @@ Template.issuePage.events({
         $('#div-comment').removeClass('in');
     },
     'click [id=btn-next-state]'(event, template) {
-        $('#chk-state-complete').radiocheck('uncheck');
-        unblockStateTransition.set(false);
-        Meteor.call('issues.incrementState', activeProject.get(), parseInt(activeIssue.get()));
+        $('#modal-add-state-change-msg').modal();
+
+        $('#modal-add-state-change-msg').on('hidden.bs.modal', function () {
+            $('#chk-state-complete').radiocheck('uncheck');
+            unblockStateTransition.set(false);
+            Meteor.call('issues.incrementState', activeProject.get(), parseInt(activeIssue.get()), newStateChangeMsg.get());
+            $('#modal-add-state-change-msg').off();
+        });
+
     },
     'click [name=btn-next-state]'(event, template) {
         var stateIndex = 0;
         var stateName = event.target.id;
         var thisProject = Projects.findOne({'name': activeProject.get()});
         var workflow = thisProject.workflow;
-        for (stateIndex = 0; stateIndex < workflow.length; stateIndex++) {
-            if (workflow[stateIndex].stateName == stateName) {
-                break;
-            }
-        }
 
-        if (stateName == 'Closed') {
-            Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), stateIndex);
-        } else {
-            Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), stateIndex);
-        }
-        $('#chk-state-complete').radiocheck('uncheck');
-        unblockStateTransition.set(false);
+        $('#modal-add-state-change-msg').modal();
+
+        $('#modal-add-state-change-msg').on('hidden.bs.modal', function () {
+            for (stateIndex = 0; stateIndex < workflow.length; stateIndex++) {
+                if (workflow[stateIndex].stateName == stateName) {
+                    break;
+                }
+            }
+
+            if (stateName == 'Closed') {
+                Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), stateIndex, newStateChangeMsg.get());
+            } else {
+                Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), stateIndex, newStateChangeMsg.get());
+            }
+            $('#chk-state-complete').radiocheck('uncheck');
+            unblockStateTransition.set(false);
+
+            $('#modal-add-state-change-msg').off();
+        });
     },
     'click [name=comments-tab]'(event, template) {
         tabChanged.set(true);
@@ -308,12 +326,7 @@ Template.issuePage.events({
             var thisProject = Projects.findOne({'name': activeProject.get()});
 
             var participant = $('#select-participant :selected').text()
-            Meteor.call('issues.addParticipant', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, participant, function (error, result) {
-                if (result) {
-                    var historyTxt = '[' + moment(new Date()).format('YYYY-MM-DD, HH:MM') + '] ' + Meteor.user().username + ' added ' + participant + ' as a ' + thisProject.workflow[thisIssue.stateIndex].participantsRole;
-                    Meteor.call('issues.addHistory', activeProject.get(), parseInt(activeIssue.get()), historyTxt);
-                }
-            });
+            Meteor.call('issues.addParticipant', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, participant);
         }
     },
     'change [id=chk-state-complete]'(event, template) {
@@ -324,10 +337,25 @@ Template.issuePage.events({
         }
     },
     'click [id=btn-reopen-issue]'(event, template) {
-        Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), 1);
+        $('#modal-add-state-change-msg').modal();
+
+        $('#modal-add-state-change-msg').on('hidden.bs.modal', function () {
+            Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), 1);
+            $('#modal-add-state-change-msg').off();
+        });
     },
     'click [id=a-edit-issue]'(event, template) {
         editIssue.set(true);
         target.set('newIssue');
+    },
+    'click [name=a-state-change-msg]'(event, template) {
+        stateChangeMsg.set(event.target.attributes.value.textContent);
+        $('#modal-state-change-msg').modal();
+    },
+    'keypress [id=txt-state-change-msg]'(event, template) {
+        if (event.keyCode == 13) {
+            newStateChangeMsg.set(event.target.value);
+            $("#modal-add-state-change-msg").modal('toggle');
+        }
     }
 });

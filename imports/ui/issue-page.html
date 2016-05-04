@@ -119,7 +119,58 @@
             <div class="col-xs-12">
                 <ul>
                     {{#each entry in issue.history}}
-                        <li>{{entry}}</li>
+                        {{#if eq entry.type "$issueCreated"}}
+                            <li>
+                                <b>[{{entry.date}}]</b>
+                                Issue created by
+                                <a href="#nolink" name="a-user-id" id={{entry.actor}}>
+                                    {{entry.actor}}
+                                </a>
+                                and assigned to
+                                <a href="#nolink" name="a-user-id" id={{entry.assignee}}>
+                                    {{entry.assignee}}
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{#if eq entry.type "$addParticipant"}}
+                            <li>
+                                <b>[{{entry.date}}]</b>
+                                <a href="#nolink" name="a-user-id" id={{entry.actor}}>
+                                    {{entry.actor}}
+                                </a>
+                                added
+                                <a href="#nolink" name="a-user-id" id={{entry.assignee}}>
+                                    {{entry.participant}}
+                                </a>
+                                as a <em>{{entry.participantsRole}}</em>
+                            </li>
+                        {{/if}}
+
+                        {{#if eq entry.type "$updateIssue"}}
+                            <li>
+                                <b>[{{entry.date}}]</b>
+                                Issue updated by
+                                <a href="#nolink" name="a-user-id" id={{entry.actor}}>
+                                    {{entry.actor}}
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{#if eq entry.type "$changeState"}}
+                            <li>
+                                <b>[{{entry.date}}]</b>
+                                <a href="#nolink" name="a-user-id" id={{entry.actor}}>
+                                    {{entry.actor}}
+                                </a>
+                                changed state:
+                                <span class="text-danger">{{entry.startState}} ➔ {{entry.endState}}</span>
+                                [<a href="#nolink" class="text-info" name="a-state-change-msg" value={{entry.msg}}>
+                                    ...
+                                </a>]
+                            </li>
+                        {{/if}}
+
                     {{/each}}
                 </ul>
             </div>
@@ -174,4 +225,45 @@
             </div>
         </div>
     {{/if}}
+
+    <div class="modal fade" id="modal-state-change-msg" tabindex="-1" role="dialog" aria-labelledby="modal-state-change-label">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h5 class="modal-title" id="modal-state-change-label">State change message...</h5>
+                </div>
+
+                <div class="modal-body">
+                    <p>{{stateChangeMsg}}</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-add-state-change-msg" tabindex="-1" role="dialog" aria-labelledby="modal-add-state-change-label">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h5 class="modal-title" id="modal-add-state-change-label">Add a state change message...</h5>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row" style="padding-top: 5px;">
+                        <div class="col-xs-12">
+                            <textarea id="txt-state-change-msg" class="form-control" placeholder=""></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </template>

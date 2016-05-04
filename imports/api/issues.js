@@ -34,7 +34,13 @@ Meteor.methods({
                 }
             }
 
-            var historyTxt = '[' + moment(new Date()).format('YYYY-MM-DD, HH:MM') + '] Issue created by ' + Meteor.user().username + ' and assigned to ' + responsible;
+            var history = [];
+            history.push({
+                    type: '$issueCreated',
+                    date: moment(new Date()).format('YYYY-MM-DD, HH:mm'),
+                    actor: Meteor.user().username,
+                    assignee: responsible});
+
             Issues.insert({
                 number: Issues.find({}).count() + 1,
                 project: project,
@@ -51,7 +57,7 @@ Meteor.methods({
                 workflow: workflow,
                 createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
                 dueDate: dueDate,
-                history: [historyTxt],
+                history: history,
                 participants: participants
             });
         }
@@ -70,7 +76,12 @@ Meteor.methods({
         var thisProject = Projects.findOne({'name': project});
         var thisIssue = Issues.findOne({'project': project, 'number': issue});
 
-        thisIssue.history.push('[' + moment(new Date()).format('YYYY-MM-DD, HH:MM') + '] Issue updated by ' + Meteor.user().username);
+        thisIssue.history.push({
+            type: '$updateIssue',
+            date: moment(new Date()).format('YYYY-MM-DD, HH:mm'),
+            actor: Meteor.user().username,
+        });
+
         Issues.update({
             number: issue,
             project: project
@@ -86,7 +97,7 @@ Meteor.methods({
             }
         });
     },
-    'issues.incrementState'(project, issueNumber) {
+    'issues.incrementState'(project, issueNumber, stateChangeMsg) {
         check(project, String);
         check(issueNumber, Number);
 
@@ -95,15 +106,29 @@ Meteor.methods({
 
         if (thisIssue.responsible == Meteor.user().username) {
             if (thisIssue.stateIndex < (thisProject.workflow.length - 1)) {
+                var startState = thisIssue.workflow[thisIssue.stateIndex].stateName;
                 thisIssue.stateIndex += 1;
+                var endState = thisIssue.workflow[thisIssue.stateIndex].stateName;
+
                 thisIssue.isClosed = (thisIssue.stateIndex == thisIssue.workflow.length - 1);
+
+                thisIssue.history.push({
+                    type: '$changeState',
+                    date: moment(new Date()).format('YYYY-MM-DD, HH:mm'),
+                    actor: Meteor.user().username,
+                    startState: startState,
+                    endState: endState,
+                    msg: stateChangeMsg,
+                });
+
                 Issues.update({
                     'project': project, 'number': issueNumber
                 }, {
                     $set: {
                         'stateIndex': thisIssue.stateIndex,
                         'isClosed': thisIssue.isClosed,
-                        'stateStr': thisIssue.workflow[thisIssue.stateIndex].stateName
+                        'stateStr': thisIssue.workflow[thisIssue.stateIndex].stateName,
+                        'history': thisIssue.history,
                     }
                 });
             }
@@ -111,7 +136,7 @@ Meteor.methods({
             throw new Meteor.Error('not-authorized');
         }
     },
-    'issues.setState'(project, issueNumber, state, subStateMsg) {
+    'issues.setState'(project, issueNumber, state, stateChangeMsg, subStateMsg) {
         check(project, String);
         check(issueNumber, Number);
         check(state, Number);
@@ -120,15 +145,29 @@ Meteor.methods({
         var thisProject = Projects.findOne({'name': project});
 
         if (thisIssue.responsible == Meteor.user().username) {
+            var startState = thisIssue.workflow[thisIssue.stateIndex].stateName;
             thisIssue.stateIndex = state;
+            var endState = thisIssue.workflow[thisIssue.stateIndex].stateName;
+
             thisIssue.isClosed = (thisIssue.stateIndex == thisIssue.workflow.length - 1);
+
+            thisIssue.history.push({
+                type: '$changeState',
+                date: moment(new Date()).format('YYYY-MM-DD, HH:mm'),
+                actor: Meteor.user().username,
+                startState: startState,
+                endState: endState,
+                msg: stateChangeMsg,
+            });
+
             Issues.update({
                 'project': project, 'number': issueNumber
             }, {
                 $set: {
                     'stateIndex': thisIssue.stateIndex,
                     'isClosed': thisIssue.isClosed,
-                    'stateStr': thisIssue.workflow[thisIssue.stateIndex].stateName
+                    'stateStr': thisIssue.workflow[thisIssue.stateIndex].stateName,
+                    'history': thisIssue.history,
                 }
             });
 
@@ -146,29 +185,28 @@ Meteor.methods({
         check(state, Number);
         check(participant, String);
 
-        var result = false;
+        var participantFound = true;
         var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
 
         var participants = thisIssue.participants;
         if(participants[state].indexOf(participant) < 0) {
             participants[state].push(participant);
-            result = true;
+            participantFound = false;
         }
 
-        Issues.update({'project': project, 'number': issueNumber}, {$set: {'participants': participants}});
+        if (!participantFound) {
+            var history = thisIssue.history;
+            history.push({
+                type: '$addParticipant',
+                date: moment(new Date()).format('YYYY-MM-DD, HH:mm'),
+                actor: Meteor.user().username,
+                participant: participant,
+                participantsRole: thisIssue.workflow[thisIssue.stateIndex].participantsRole
+            });
 
-        return result;
+            Issues.update({'project': project, 'number': issueNumber}, {$set: {'participants': participants, 'history': history}});
+        }
+
+        return (!participantFound);
     },
-    'issues.addHistory'(project, issueNumber, text) {
-        check(project, String);
-        check(issueNumber, Number);
-        check(text, String);
-
-        var thisIssue = Issues.findOne({'project': project, 'number': issueNumber});
-
-        var history = thisIssue.history;
-        history.push(text);
-
-        Issues.update({'project': project, 'number': issueNumber}, {$set: {'history': history}});
-    }
 });
