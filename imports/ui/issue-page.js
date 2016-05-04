@@ -283,10 +283,14 @@ Template.issuePage.events({
     'click [id=btn-next-state]'(event, template) {
         $('#modal-add-state-change-msg').modal();
 
-        $('#modal-add-state-change-msg').on('hidden.bs.modal', function () {
+        function worker() {
             $('#chk-state-complete').radiocheck('uncheck');
             unblockStateTransition.set(false);
             Meteor.call('issues.incrementState', activeProject.get(), parseInt(activeIssue.get()), newStateChangeMsg.get());
+        }
+
+        $('#modal-add-state-change-msg').on('hidden.bs.modal', function () {
+            worker();
             $('#modal-add-state-change-msg').off();
         });
 
@@ -297,9 +301,7 @@ Template.issuePage.events({
         var thisProject = Projects.findOne({'name': activeProject.get()});
         var workflow = thisProject.workflow;
 
-        $('#modal-add-state-change-msg').modal();
-
-        $('#modal-add-state-change-msg').on('hidden.bs.modal', function () {
+        function worker() {
             for (stateIndex = 0; stateIndex < workflow.length; stateIndex++) {
                 if (workflow[stateIndex].stateName == stateName) {
                     break;
@@ -313,7 +315,12 @@ Template.issuePage.events({
             }
             $('#chk-state-complete').radiocheck('uncheck');
             unblockStateTransition.set(false);
+        }
 
+        $('#modal-add-state-change-msg').modal();
+
+        $('#modal-add-state-change-msg').on('hidden.bs.modal', function () {
+            worker();
             $('#modal-add-state-change-msg').off();
         });
     },
@@ -339,8 +346,12 @@ Template.issuePage.events({
     'click [id=btn-reopen-issue]'(event, template) {
         $('#modal-add-state-change-msg').modal();
 
+        function worker() {
+            Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), 1, newStateChangeMsg.get());
+        }
+
         $('#modal-add-state-change-msg').on('hidden.bs.modal', function () {
-            Meteor.call('issues.setState', activeProject.get(), parseInt(activeIssue.get()), 1);
+            worker();
             $('#modal-add-state-change-msg').off();
         });
     },
