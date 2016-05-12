@@ -2,9 +2,14 @@
     <div class="well well-lg">
         <div class="row">
             <div class="col-xs-9">
-                <h5>{{issue.title}}</h5>
-                Created by <b>{{issue.createdBy}}</b> at {{issue.createdAt}}
-                <hr>
+                <h5 style="margin-bottom: 0px;">{{issue.title}}</h5>
+                <small>
+                    Created by
+                    <a href="#nolink" name="a-user-id" id={{issue.createdBy}}>
+                        {{issue.createdBy}}
+                    </a>
+                    at {{issue.createdAt}}
+                </small>
             </div>
             <div class="col-xs-3">
                 {{#if not disableIssueControls}}
@@ -12,46 +17,83 @@
                 {{/if}}
             </div>
         </div>
+        <hr style="margin-top: 5px;">
+
         <div class="row">
-            <div class="col-xs-2">
+            <div class="col-xs-2 col-issue-field-name">
                 <b>State:</b>
             </div>
-            <div class="col-xs-3">
-                <p class="pull-left">{{currentState.stateName}} &nbsp;{{subStateMsg}}</p>
+            <div class="col-xs-3 col-issue-field">
+                <p class="pull-left p-issue-fields">{{currentState.stateName}} &nbsp;{{subStateMsg}}</p>
             </div>
             <div class="col-xs-2"></div>
-            <div class="col-xs-2">
+            <div class="col-xs-2 col-issue-field-name">
                 <b>Start date:</b>
             </div>
-            <div class="col-xs-3">
-                <p class="pull-left">{{issue.startDate}}</p>
+            <div class="col-xs-3 col-issue-field">
+                <p class="pull-left p-issue-fields">{{issue.startDate}}</p>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-2">
+            <div class="col-xs-2 col-issue-field-name">
                 <b>Responsible:</b>
             </div>
-            <div class="col-xs-3">
-                <p class="pull-left">{{issue.responsible}}</p>
+            <div class="col-xs-3 col-issue-field">
+                <p class="pull-left p-issue-fields">
+                    <a href="#nolink" name="a-user-id" id={{issue.responsible}}>
+                        {{issue.responsible}}
+                    </a>
+                </p>
             </div>
-            <div class="col-xs-2"></div>
+            <div class="col-xs-2 col-issue-field-name"></div>
             <div class="col-xs-2">
                 <b>Due date:</b>
             </div>
+            <div class="col-xs-3 col-issue-field">
+                <p class="pull-left p-issue-fields">{{issue.dueDate}}</p>
+            </div>
+        </div>
+        <hr style="margin-top: 5px;">
+
+        <div class="row">
+            <div class="col-xs-2">
+                <b>Tracker:</b>
+            </div>
             <div class="col-xs-3">
-                <p class="pull-left">{{issue.dueDate}}</p>
+                <p class="pull-left p-issue-fields">{{issue.tracker}}</p>
+            </div>
+            <div class="col-xs-2"></div>
+            <div class="col-xs-2">
+                <b>Priority:</b>
+            </div>
+            <div class="col-xs-3">
+                <p class="pull-left p-issue-fields">{{issue.priority}}</p>
             </div>
         </div>
 
-        <hr>
+        <div class="row">
+            <div class="col-xs-2">
+                <b>Severity:</b>
+            </div>
+            <div class="col-xs-3">
+                <p class="pull-left p-issue-fields">
+                    {{issue.severity}}
+                </p>
+            </div>
+            <div class="col-xs-2"></div>
+            <div class="col-xs-2"></div>
+            <div class="col-xs-3"></div>
+        </div>
+        <hr style="margin-top: 5px;">
+
         <b>Description</b>
         <p>
             {{issue.description}}
         </p>
 
         {{#if not disableIssueControls}}
-            <hr>
+            <hr style="margin-top: 5px;">
             <div class="row">
                 {{#if currentState.hasParticipants}}
                     <div class="col-xs-4">
@@ -213,7 +255,13 @@
                         </div>
                         {{#each comment in comments}}
                             <div class="col-xs-12">
-                                <small class="text-muted"><strong>{{comment.createdBy}}</strong> at <strong>{{comment.createdAt}}:</strong></small><small class="pull-right">#{{comment.number}}</small>
+                                <small class="text-muted">
+                                    <strong><a href="#nolink" name="a-user-id" id={{comment.createdBy}} style="color: rgba(22, 160, 133, 0.59);">
+                                        {{comment.createdBy}}
+                                    </a></strong>
+                                    at <strong>{{comment.createdAt}}:</strong>
+                                </small>
+                                <small class="pull-right">#{{comment.number}}</small>
                             </div>
                             <div class="col-xs-12">
                                 {{comment.text}}

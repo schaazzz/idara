@@ -276,11 +276,6 @@ Template.issuePage.helpers({
             }
         }
 
-        console.log(thisIssue.stateIndex);
-        console.log(tabStateIndex);
-        console.log(thisIssue.workflow[thisIssue.stateIndex].openComments);
-        console.log(thisIssue.participants[thisIssue.stateIndex].indexOf(Meteor.user().username));
-        
         if((thisIssue.stateIndex == tabStateIndex)
             && (thisIssue.workflow[thisIssue.stateIndex].openComments
                 ||  (thisIssue.participants[thisIssue.stateIndex].indexOf(Meteor.user().username) >= 0))) {
