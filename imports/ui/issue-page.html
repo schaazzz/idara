@@ -165,9 +165,11 @@
                                 </a>
                                 changed state:
                                 <span class="text-danger">{{entry.startState}} ➔ {{entry.endState}}</span>
-                                [<a href="#nolink" class="text-info" name="a-state-change-msg" value={{entry.msg}}>
-                                    ...
-                                </a>]
+                                {{#if startStateHasStateChangeComment entry.startState}}
+                                    [<a href="#nolink" class="text-info" name="a-state-change-msg" value={{entry.msg}}>
+                                        ...
+                                    </a>]
+                                {{/if}}
                             </li>
                         {{/if}}
 

@@ -29,7 +29,7 @@ Meteor.methods({
             for (var i  = 0; i < workflow.length; i++) {
                 participants.push([]);
 
-                if (thisProject.workflow[i].hasParticipants) {
+                if ((i >= 1) || (i < (workflow.length - 1))) {
                     participants[i].push(responsible);
                 }
             }
