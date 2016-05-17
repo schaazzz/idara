@@ -298,7 +298,7 @@ Template.issuePage.helpers({
 Template.issuePage.events({
     'click [id=btn-add-comment]'(event, template) {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
-        Meteor.call('comments.insert', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, $('#txt-comment').val());
+        Meteor.call('comments.insert', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, $('#txt-comment').val().replace(/\n/gm, '<br>'));
         $('#txt-comment').val('');
         $('#div-comment').removeClass('in');
     },
