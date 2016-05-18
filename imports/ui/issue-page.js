@@ -298,7 +298,30 @@ Template.issuePage.helpers({
 Template.issuePage.events({
     'click [id=btn-add-comment]'(event, template) {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
-        Meteor.call('comments.insert', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, $('#txt-comment').val().replace(/\n/gm, '<br>'));
+
+        var reader = new commonmark.Parser();
+        var writer = new commonmark.HtmlRenderer();
+
+        var parsed = reader.parse($('#txt-comment').val());
+        var result = writer.render(parsed);
+        // console.log(result);
+        var tempResult = $(result);
+        var out = '';
+        for (i = 0; i < tempResult.length; i++) {
+            if ($(tempResult[i]).find('img')[0]) {
+                $(tempResult[i]).html($(tempResult[i]).find('img').addClass('img-responsive')[0].outerHTML);
+            }
+        }
+
+        for (i = 0; i < tempResult.length; i++) {
+            if (tempResult[i].outerHTML) {
+                out += tempResult[i].outerHTML;
+            }
+        }
+
+        result = out;
+        console.log(typeof(result), result.toString());
+        Meteor.call('comments.insert', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, result);
         $('#txt-comment').val('');
         $('#div-comment').removeClass('in');
     },
