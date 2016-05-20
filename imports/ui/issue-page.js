@@ -98,11 +98,12 @@ Template.issuePage.helpers({
         return Files.find({});
     },
     link() {
-        result = Files.baseURL + "/md5/" + this.md5;
+        result = {path: Files.baseURL + "/md5/" + this.md5, filename: this.filename};
 
         if (this.filename.indexOf('_Resumable_') >= 0 ) {
             result = null;
         }
+
         return (result);
     },
     uploadProgress() {
@@ -364,6 +365,9 @@ Template.issuePage.helpers({
 });
 
 Template.issuePage.events({
+    'click #a-delete-file'(event, template) {
+        Files.remove({'_id': this._id});
+    },
     'click [id=btn-add-comment]'(event, template) {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
 

@@ -30,13 +30,14 @@ if (Meteor.isServer) {
                 return true;
             },
             read: function(userId, file) {
-                var ref, ref1;
                 return true;
             },
             write: function(userId, file, fields) {
-                var ref, ref1;
                 return true;
-            }
+            },
+            remove: function(userId, file) {
+                return true;
+            },
         });
     });
 }
