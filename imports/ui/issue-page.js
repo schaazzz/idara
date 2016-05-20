@@ -1,8 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
-import {Projects} from '../api/projects';
-import {Issues} from '../api/issues';
-import {Comments} from '../api/comments';
+import { Projects } from '../api/projects';
+import { Issues } from '../api/issues';
+import { Comments } from '../api/comments';
+import { Files } from '../api/files';
 import './issue-page.html';
 
 var tabChanged = new ReactiveVar(false);
@@ -27,12 +28,47 @@ function findStateByName(stateName) {
     return (result);
 }
 
+Meteor.startup(function() {
+    Files.resumable.on('fileAdded', function (file) {
+        Session.set(file.uniqueIdentifier, 0);
+        return Files.insert({
+            _id: file.uniqueIdentifier,
+            filename: file.fileName,
+            contentType: file.file.type
+        }, function (error, _id) {
+            if (error)  {
+                console.warn('File creation failed!', error);
+                return;
+            }
+
+            return Files.resumable.upload();
+        });
+    });
+
+    Files.resumable.on('fileProgress', function (file) {
+        return Session.set(file.uniqueIdentifier, Math.floor(100 * file.progress()));
+    });
+
+    Files.resumable.on('fileSuccess', function (file) {
+        return Session.set(file.uniqueIdentifier, void 0);
+    });
+
+    return Files.resumable.on('fileError', function (file) {
+        console.warn("Error uploading", file.uniqueIdentifier);
+        return Session.set(file.uniqueIdentifier, void 0);
+    });
+
+});
+
 Template.issuePage.onCreated(function onCreated () {
 });
 
 Template.issuePage.onRendered(function onRendered() {
     var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()});
     var workflow = thisIssue.workflow;
+
+    Files.resumable.assignBrowse($("#a-attach-file"));
+    Files.resumable.assignDrop($("#div-attach-files"));
 
     this.$('#chk-state-complete').radiocheck();
 
@@ -55,6 +91,38 @@ Template.issuePage.onRendered(function onRendered() {
 });
 
 Template.issuePage.helpers({
+    numAttachedFiles() {
+        return Files.find({'metadata._Resumable': {$exists: false}, 'length': {$ne: 0}}).count();
+    },
+    attachements() {
+        return Files.find({});
+    },
+    link() {
+        result = Files.baseURL + "/md5/" + this.md5;
+
+        if (this.filename.indexOf('_Resumable_') >= 0 ) {
+            result = null;
+        }
+        return (result);
+    },
+    uploadProgress() {
+        var percent = Session.get("" + this._id._str);
+        var result = void 0;
+
+        if (percent) {
+            var filename = '';
+
+            if (this.metadata._Resumable) {
+                filename = this.metadata._Resumable.resumableFilename;
+            } else {
+                filename = this.filename;
+            }
+
+            result = 'Uploading "' + filename + '": ' + percent + '%';
+        }
+
+        return result;
+    },
     allStates() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
         var thisProject = Projects.findOne({'name': activeProject.get()});
@@ -292,7 +360,7 @@ Template.issuePage.helpers({
         }
 
         return (result);
-    }
+    },
 });
 
 Template.issuePage.events({
@@ -304,7 +372,7 @@ Template.issuePage.events({
 
         var parsed = reader.parse($('#txt-comment').val());
         var result = writer.render(parsed);
-        // console.log(result);
+
         var tempResult = $(result);
         var out = '';
         for (i = 0; i < tempResult.length; i++) {

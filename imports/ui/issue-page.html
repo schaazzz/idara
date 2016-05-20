@@ -220,6 +220,30 @@
             </div>
         </div>
     </div>
+
+    <div class="well well-lg">
+        <div class="row" id="div-attach-files">
+            <div class="col-xs-12" style="font-size: 80%">
+                <b>Attached files ({{numAttachedFiles}})</b>
+                <p style="font-size: 80%">You can also drag and drop files here</p>
+            </div>
+            <div class="col-xs-12" style="font-size: 80%">
+                {{#each attachements}}
+                    {{#if length}}
+                        {{link}}
+                    {{/if}}
+                {{/each}}
+                <hr>
+                <a class="pull-right" href="#no-link" id="a-attach-file">Attach files</a>
+                <span class="pull-left">
+                    {{#each attachements}}
+                        {{uploadProgress}}
+                    {{/each}}
+                </span>
+            </div>
+        </div>
+    </div>
+
     {{#if showComments}}
         <ul id="div-state-tabs" class="nav nav-tabs">
             {{#each state in allStates}}
