@@ -16,16 +16,17 @@ export const Files = new FileCollection(
                                                     md5: params.md5
                                                 };
                                             }
-                                    }]});
+                                        }]
+                                    });
 
 if (Meteor.isServer) {
     Meteor.startup(function() {
         return Files.allow({
             insert: function(userId, file) {
-                var ref;
-                file.metadata = (ref = file.metadata) != null ? ref : {};
-                file.metadata._auth = {
-                    owner: userId
+                var temp;
+                file.metadata = (temp = file.metadata) != null ? temp : {};
+                file.metadata.author = {
+                    id: userId,
                 };
                 return true;
             },

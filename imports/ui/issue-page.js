@@ -34,6 +34,14 @@ Meteor.startup(function() {
         return Files.insert({
             _id: file.uniqueIdentifier,
             filename: file.fileName,
+            metadata: {
+                issue:  {
+                    id: Issues.findOne({
+                        'number': parseInt(activeIssue.get()),
+                        'project': activeProject.get()
+                    })._id
+                }
+            },
             contentType: file.file.type
         }, function (error, _id) {
             if (error)  {
@@ -92,10 +100,21 @@ Template.issuePage.onRendered(function onRendered() {
 
 Template.issuePage.helpers({
     numAttachedFiles() {
-        return Files.find({'metadata._Resumable': {$exists: false}, 'length': {$ne: 0}}).count();
+        return Files.find({
+            'metadata._Resumable': {$exists: false},
+            'length': {$ne: 0},
+            'metadata.issue.id': Issues.findOne({
+                'number': parseInt(activeIssue.get()),
+                'project': activeProject.get()
+            })._id}).count();
     },
     attachements() {
-        return Files.find({});
+        return Files.find({
+            'metadata.issue.id': Issues.findOne({
+                'number': parseInt(activeIssue.get()),
+                'project': activeProject.get()
+            })._id
+        });
     },
     link() {
         result = {path: Files.baseURL + "/md5/" + this.md5, filename: this.filename};
