@@ -28,6 +28,11 @@ function findStateByName(stateName) {
     return (result);
 }
 
+function parseImageSrc(imageUrl) {
+    console.log(imageUrl);
+    return (imageUrl);
+}
+
 Meteor.startup(function() {
     Files.resumable.on('fileAdded', function (file) {
         Session.set(file.uniqueIdentifier, 0);
@@ -400,6 +405,7 @@ Template.issuePage.events({
         var out = '';
         for (i = 0; i < tempResult.length; i++) {
             if ($(tempResult[i]).find('img')[0]) {
+                var imgSrc = parseImageSrc($(tempResult[i]).find('img').attr('src'));
                 $(tempResult[i]).html($(tempResult[i]).find('img').addClass('img-responsive')[0].outerHTML);
             }
         }
