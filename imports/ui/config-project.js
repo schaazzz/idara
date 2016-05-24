@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import { Projects } from '../api/projects';
 import './config-project.html';
 
 var thisProject = null;
