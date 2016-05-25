@@ -9,6 +9,7 @@ Template.loginForm.events({
         const password = template.find('[id=password]').value;
         Meteor.loginWithPassword(username, password, function (error) {
             if (!error) {
+                activeUserPage.set(Meteor.user().username);
                 loggedIn.set(true);
             } else {
                 loggedIn.set(false);

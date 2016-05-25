@@ -460,6 +460,11 @@ Template.issuePage.events({
         $('#modal-show-img-display').attr('src', event.target.attributes.src.value);
         $('#modal-show-img').modal()
     },
+    'click [name=a-user-id]'(event, template) {
+        console.log(event);
+         activeUserPage.set(event.target.id);
+         target.set('userPage');
+    },
     'click [id=btn-next-state]'(event, template) {
         function worker() {
             $('#chk-state-complete').radiocheck('uncheck');

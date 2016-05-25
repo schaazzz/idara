@@ -165,11 +165,11 @@
                             <li>
                                 <b>[{{entry.date}}]</b>
                                 Issue created by
-                                <a href="#nolink" name="a-user-id" id={{entry.actor}}>
+                                <a href="#noline" name="a-user-id" id={{entry.actor}}>
                                     {{entry.actor}}
                                 </a>
                                 and assigned to
-                                <a href="#nolink" name="a-user-id" id={{entry.assignee}}>
+                                <a href="#noling" name="a-user-id" id={{entry.assignee}}>
                                     {{entry.assignee}}
                                 </a>
                             </li>
@@ -178,11 +178,11 @@
                         {{#if eq entry.type "$addParticipant"}}
                             <li>
                                 <b>[{{entry.date}}]</b>
-                                <a href="#nolink" name="a-user-id" id={{entry.actor}}>
+                                <a href="#nolint" name="a-user-id" id={{entry.actor}}>
                                     {{entry.actor}}
                                 </a>
                                 added
-                                <a href="#nolink" name="a-user-id" id={{entry.assignee}}>
+                                <a href="#nolinp" name="a-user-id" id={{entry.participant}}>
                                     {{entry.participant}}
                                 </a>
                                 as a <em>{{entry.participantsRole}}</em>

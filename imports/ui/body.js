@@ -4,7 +4,7 @@ import { ReactiveDict } from 'meteor/reactive-dict';
 import { Accounts } from 'meteor/accounts-base';
 import './login';
 import './cpanel';
-import './home';
+import './user-page';
 import './projects';
 import './config-project';
 import './project-page';
@@ -14,12 +14,13 @@ import './edit-workflow';
 import './body.html';
 
 loggedIn = new ReactiveVar(true);
-target = new ReactiveVar('home');
+target = new ReactiveVar('userPage');
 activeProject = new ReactiveVar(null);
 editIssue = new ReactiveVar(false);
 workflow = new ReactiveVar('default');
 activeWorkflow = new ReactiveVar(null);
 newWorkflow = new ReactiveVar(false);
+activeUserPage = new ReactiveVar(null);
 
 Template.body.onCreated(function onCreated() {
     this.state = new ReactiveDict();
@@ -64,6 +65,7 @@ Template.body.events({
         target.set('projects');
     },
     'click [id=btn-usr-page]'(event, template) {
-        target.set('home');
+        activeUserPage.set(Meteor.user().username);
+        target.set('userPage');
     },
 });
