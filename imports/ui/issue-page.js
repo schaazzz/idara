@@ -29,8 +29,29 @@ function findStateByName(stateName) {
 }
 
 function parseImageSrc(imageUrl) {
-    console.log(imageUrl);
-    return (imageUrl);
+    var url = imageUrl;
+    var filename = url;
+
+    var issueId = Issues.findOne({
+        'number': parseInt(activeIssue.get()),
+        'project': activeProject.get()
+    })._id;
+
+    if (url.search('/') < 0) {
+        var file = Files.findOne({filename: url, 'metadata.issue.id': issueId});
+        filename = url;
+
+        if (file) {
+            url = Files.baseURL + '/md5/' + file.md5;
+        }
+    } else {
+        filename = filename.substr(filename.lastIndexOf('/') + 1);
+    }
+
+    return {
+        url: url,
+        filename: filename
+    };
 }
 
 Meteor.startup(function() {
@@ -122,7 +143,7 @@ Template.issuePage.helpers({
         });
     },
     link() {
-        result = {path: Files.baseURL + "/md5/" + this.md5, filename: this.filename};
+        result = {path: Files.baseURL + '/md5/' + this.md5, filename: this.filename};
 
         if (this.filename.indexOf('_Resumable_') >= 0 ) {
             result = null;
@@ -406,7 +427,19 @@ Template.issuePage.events({
         for (i = 0; i < tempResult.length; i++) {
             if ($(tempResult[i]).find('img')[0]) {
                 var imgSrc = parseImageSrc($(tempResult[i]).find('img').attr('src'));
-                $(tempResult[i]).html($(tempResult[i]).find('img').addClass('img-responsive')[0].outerHTML);
+                $(tempResult[i])
+                    .html(
+                        '<a href="#nolink" name="a-open-image">' +
+                        $(tempResult[i])
+                            .find('img')
+                            .attr('src', imgSrc.url)
+                            .attr('filename', imgSrc.filename)
+                            .addClass('img-responsive')
+                            .css('max-width', '50%')
+                            .attr('align', 'middle')[0]
+                            .outerHTML
+                        + '</a>'
+                    );
             }
         }
 
@@ -421,6 +454,11 @@ Template.issuePage.events({
         Meteor.call('comments.insert', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, result);
         $('#txt-comment').val('');
         $('#div-comment').removeClass('in');
+    },
+    'click [name=a-open-image]'(event, template) {
+        $('#modal-show-img-label').text(event.target.attributes.filename.value);
+        $('#modal-show-img-display').attr('src', event.target.attributes.src.value);
+        $('#modal-show-img').modal()
     },
     'click [id=btn-next-state]'(event, template) {
         function worker() {
