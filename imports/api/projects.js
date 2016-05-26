@@ -23,13 +23,13 @@ Meteor.methods({
                 pmUsers: [],
                 workflow: workflow,
                 createdAt: new Date(),
-                createdBy: Meteor.user().username,
+                createdBy: Meteor.user().username
             });
         } else {
             throw new Meteor.Error('not-authorized');
         }
     },
-    'projects.update'(_id, name, description, admin, pmUsers, noIssueFilingRestrictions) {
+    'projects.update'(_id, name, description, admin, pmUsers, noIssueFilingRestrictions, customFields) {
         check(_id, String);
         check(name, String);
         check(description, String);
@@ -47,7 +47,8 @@ Meteor.methods({
                     'description': description,
                     'admin': admin,
                     'pmUsers': pmUsers,
-                    'noIssueFilingRestrictions': noIssueFilingRestrictions
+                    'noIssueFilingRestrictions': noIssueFilingRestrictions,
+                    'customFields': customFields
                 }}
             );
         } else {

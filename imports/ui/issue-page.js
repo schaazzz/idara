@@ -101,6 +101,19 @@ Template.issuePage.onRendered(function onRendered() {
     var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()});
     var workflow = thisIssue.workflow;
 
+    customFields = {};
+
+    var xmlDoc = $($.parseXML(thisIssue.customFields));
+    var children = xmlDoc.find('customFields')[0].children;
+    console.log(xmlDoc.find('customFields'));
+    for (var i = 0; i < children.length; i++) {
+        console.log(children[i].attributes);
+        console.log(children[i].tagName);
+        customFields[children[i].tagName + '_' + children[i].attributes.name.value] = i;
+    }
+
+    console.log(customFields);
+
     Files.resumable.assignBrowse($("#a-attach-file"));
     Files.resumable.assignDrop($("#div-attach-files"));
 

@@ -116,7 +116,7 @@ Template.editWorkflow.onCreated(function onCreated() {
 Template.editWorkflow.onRendered(function onRendered() {
     jsonEditor = CodeMirror.fromTextArea(
         document.getElementById('txt-workflow'),
-        {indentUnit: 4, tabSize: 4, indentWithTabs: false, cursorHeight: 0.85});
+        {indentUnit: 4, tabSize: 4, indentWithTabs: false, mode: {name: "javascript", json: true}, cursorHeight: 0.85});
 
     $(".CodeMirror").css('font-size','10pt');
     $(".CodeMirror").css('border', '2px solid #1abc9c');

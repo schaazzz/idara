@@ -17,6 +17,18 @@ Meteor.methods({
         check(responsible, String);
 
         var thisProject = Projects.findOne({'name': project});
+        var customFieldsXml = thisProject.customFields;
+        var customFields = {};
+
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(customFieldsXml, 'text/xml');
+        console.log('-->', xmlDoc);
+
+        for (var i = 0; i < children.length; i++) {
+            customFields[children[i].tagName + '_' + children[i].attributes.name.value] = void 0;
+        }
+
+        console.log(customFields);
 
         if (Meteor.user().profile.isRoot
             || thisProject.noIssueFilingRestrictions
@@ -58,7 +70,8 @@ Meteor.methods({
                 createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
                 dueDate: dueDate,
                 history: history,
-                participants: participants
+                participants: participants,
+                customFields: customFields,
             });
         }
     },
