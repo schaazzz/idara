@@ -5,7 +5,7 @@ import {Issues} from '../api/issues';
 import './new-issue.html';
 
 Template.newIssue.onRendered(function onRendered() {
-    if (editIssue.get()){
+    if (editIssue.get()) {
         var issue = Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())});
         this.$('#issue-title').val(issue.title);
         this.$('#select-tracker').val(issue.tracker);
@@ -15,6 +15,9 @@ Template.newIssue.onRendered(function onRendered() {
         this.$('#select-responsible').val(issue.responsible);
         this.$('#issue-description').val(issue.description);
     }
+
+    console.log(Projects.findOne({'name': activeProject.get()}).customFields);
+
 });
 
 Template.newIssue.helpers({
