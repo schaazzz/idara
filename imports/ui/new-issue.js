@@ -8,14 +8,26 @@ customFieldsRowsGlobal = new ReactiveVar();
 
 Template.newIssue.onRendered(function onRendered() {
     if (editIssue.get()) {
-        var issue = Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())});
-        this.$('#issue-title').val(issue.title);
-        this.$('#select-tracker').val(issue.tracker);
-        this.$('#select-priority').val(issue.priority);
-        this.$('#select-severity').val(issue.severity);
-        this.$('#due-date').val(issue.dueDate);
-        this.$('#select-responsible').val(issue.responsible);
-        this.$('#issue-description').val(issue.description);
+        var thisIssue = Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())});
+        this.$('#issue-title').val(thisIssue.title);
+        this.$('#select-tracker').val(thisIssue.tracker);
+        this.$('#select-priority').val(thisIssue.priority);
+        this.$('#select-severity').val(thisIssue.severity);
+        this.$('#due-date').val(thisIssue.dueDate);
+        this.$('#select-responsible').val(thisIssue.responsible);
+        this.$('#issue-description').val(thisIssue.description);
+
+        var customFieldsRows = thisIssue.customFieldsRows;
+
+        if (customFieldsRows) {
+            for (var i = 0; i < customFieldsRows.length; i++) {
+                $('#' + customFieldsRows[i].first.name).val(customFieldsRows[i].first.value);
+
+                if (customFieldsRows[i].second) {
+                    $('#' + customFieldsRows[i].second.name).val(customFieldsRows[i].second.value);
+                }
+            }
+        }
     }
 });
 
@@ -95,9 +107,14 @@ Template.newIssue.events({
 
         var customFieldsRows = customFieldsRowsGlobal.get();
 
-        for (var i = 0; i < customFieldsRows.length; i++) {
-            customFieldsRows[i].first.value = $('#' + customFieldsRows[i].first.name).val();
-            customFieldsRows[i].second.value = $('#' + customFieldsRows[i].second.name).val();
+        if (customFieldsRows) {
+            for (var i = 0; i < customFieldsRows.length; i++) {
+                customFieldsRows[i].first.value = $('#' + customFieldsRows[i].first.name).val();
+
+                if (customFieldsRows[i].second) {
+                    customFieldsRows[i].second.value = $('#' + customFieldsRows[i].second.name).val();
+                }
+            }
         }
 
         if (editIssue.get()) {

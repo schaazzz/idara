@@ -96,17 +96,20 @@
                     <p class="pull-left p-issue-fields">{{first.value}}</p>
                 </div>
                 <div class="col-xs-2"></div>
-                <div class="col-xs-2">
-                    <b>{{second.title}}:</b>
-                </div>
-                <div class="col-xs-3">
-                    <p class="pull-left p-issue-fields">{{second.value}}</p>
-                </div>
+                {{#if second}}
+                    <div class="col-xs-2">
+                        <b>{{second.title}}:</b>
+                    </div>
+                    <div class="col-xs-3">
+                        <p class="pull-left p-issue-fields">{{second.value}}</p>
+                    </div>
+                {{/if}}
             </div>
         {{/each}}
-        {{#with customFieldsRows}}
+
+        {{#if customFieldsRows}}
             <hr style="margin-top: 5px;">
-        {{/with}}
+        {{/if}}
 
         <b>Description</b>
         <p>

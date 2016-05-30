@@ -74,10 +74,10 @@
         </div>
     </div>
 
-    {{#with customFieldsRows}}
+    {{#if customFieldsRows}}
         <hr>
-    {{/with}}
-    
+    {{/if}}
+
     {{#each customFieldsRows}}
         <div class="row">
             {{#if eq first.type "input"}}
