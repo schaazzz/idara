@@ -406,6 +406,9 @@ Template.issuePage.helpers({
 
         return (result);
     },
+    customFieldsRows() {
+        return Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())}).customFieldsRows;
+    }
 });
 
 Template.issuePage.events({
@@ -422,7 +425,7 @@ Template.issuePage.events({
         var result = writer.render(parsed);
 
         var tempResult = $(result);
-        var out = '';
+        var outerHTML = '';
         for (i = 0; i < tempResult.length; i++) {
             if ($(tempResult[i]).find('img')[0]) {
                 var imgSrc = parseImageSrc($(tempResult[i]).find('img').attr('src'));
@@ -444,12 +447,11 @@ Template.issuePage.events({
 
         for (i = 0; i < tempResult.length; i++) {
             if (tempResult[i].outerHTML) {
-                out += tempResult[i].outerHTML;
+                outerHTML += tempResult[i].outerHTML;
             }
         }
 
-        result = out;
-        console.log(typeof(result), result.toString());
+        result = outerHTML;
         Meteor.call('comments.insert', activeProject.get(), parseInt(activeIssue.get()), thisIssue.stateIndex, result);
         $('#txt-comment').val('');
         $('#div-comment').removeClass('in');
@@ -460,7 +462,6 @@ Template.issuePage.events({
         $('#modal-show-img').modal()
     },
     'click [name=a-user-id]'(event, template) {
-        console.log(event);
          activeUserPage.set(event.target.id);
          target.set('userPage');
     },

@@ -74,7 +74,61 @@
         </div>
     </div>
 
-    <div class="row">
+    {{#with customFieldsRows}}
+        <hr>
+    {{/with}}
+    
+    {{#each customFieldsRows}}
+        <div class="row">
+            {{#if eq first.type "input"}}
+                <div class="col-xs-2">
+                    <p class="pull-right custom-label">{{first.title}}</p>
+                </div>
+                <div class="col-xs-4">
+                    <input type="text" class="form-control" id={{first.name}} />
+                </div>
+            {{/if}}
+
+            {{#if eq first.type "select"}}
+                <div class="col-xs-2">
+                    <p class="pull-right custom-label">{{first.title}}</p>
+                </div>
+                <div class="col-xs-4">
+                    <select id={{first.name}} class="form-control" data-toggle="select" style="height: auto !important;">
+                        <option value="-1" selected></option>
+                        {{#each option in first.options}}
+                            <option value={{option}}>{{option}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+            {{/if}}
+
+            {{#if eq second.type "input"}}
+                <div class="col-xs-2">
+                    <p class="pull-right custom-label">{{second.title}}</p>
+                </div>
+                <div class="col-xs-4">
+                    <input type="text" class="form-control" id={{second.name}} />
+                </div>
+            {{/if}}
+
+            {{#if eq second.type "select"}}
+                <div class="col-xs-2">
+                    <p class="pull-right custom-label">{{second.title}}</p>
+                </div>
+                <div class="col-xs-4">
+                    <select id={{second.name}} class="form-control" data-toggle="select" style="height: auto !important;">
+                        <option value="-1" selected></option>
+                        {{#each option in second.options}}
+                            <option value={{option}}>{{option}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+            {{/if}}
+        </div>
+    {{/each}}
+
+    <div class="row" style="padding-top: 10px;">
         <div class="col-xs-12">
             <textarea id="issue-description" class="form-control" rows="10" placeholder="Description"></textarea>
         </div>
