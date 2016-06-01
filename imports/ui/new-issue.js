@@ -2,11 +2,47 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import {Projects} from '../api/projects';
 import {Issues} from '../api/issues';
+import { Files } from '../api/files';
 import './new-issue.html';
 
 customFieldsRowsGlobal = new ReactiveVar();
+attachedFilesDict = new ReactiveDict('array');
+
+function parseImageSrc(imageUrl) {
+    var url = imageUrl;
+    var filename = url;
+
+    var issueId = Issues.findOne({
+        'number': parseInt(activeIssue.get()),
+        'project': activeProject.get()
+    })._id;
+
+    if (url.search('/') < 0) {
+        var file = Files.findOne({filename: url, 'metadata.issue.id': issueId});
+        filename = url;
+
+        if (file) {
+            url = Files.baseURL + '/md5/' + file.md5;
+        }
+    } else {
+        filename = filename.substr(filename.lastIndexOf('/') + 1);
+    }
+
+    return {
+        url: url,
+        filename: filename
+    };
+}
+
+Template.newIssue.onRendered(function onCreated() {
+    attachedFilesDict.set('array', []);
+});
 
 Template.newIssue.onRendered(function onRendered() {
+
+    Files.resumable.assignBrowse($("#a-attach-file"));
+    Files.resumable.assignDrop($("#div-attach-files"));
+
     if (editIssue.get()) {
         var thisIssue = Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())});
         this.$('#issue-title').val(thisIssue.title);
@@ -15,7 +51,7 @@ Template.newIssue.onRendered(function onRendered() {
         this.$('#select-severity').val(thisIssue.severity);
         this.$('#due-date').val(thisIssue.dueDate);
         this.$('#select-responsible').val(thisIssue.responsible);
-        this.$('#issue-description').val(thisIssue.description);
+        this.$('#issue-description').val(thisIssue.descriptionMarkdown);
 
         var customFieldsRows = thisIssue.customFieldsRows;
 
@@ -31,7 +67,86 @@ Template.newIssue.onRendered(function onRendered() {
     }
 });
 
+Meteor.startup(function() {
+    Files.resumable.on('fileAdded', function (file) {
+        Session.set(file.uniqueIdentifier, 0);
+        return Files.insert({
+            _id: file.uniqueIdentifier,
+            filename: file.fileName,
+            metadata: {
+                author: Meteor.user().username,
+                project: Projects.findOne({'name': activeProject.get()})._id
+            },
+            contentType: file.file.type
+        }, function (error, _id) {
+            if (error)  {
+                console.warn('File creation failed!', error);
+                return;
+            }
+
+            return Files.resumable.upload();
+        });
+    });
+
+    Files.resumable.on('fileProgress', function (file) {
+        return Session.set(file.uniqueIdentifier, Math.floor(100 * file.progress()));
+    });
+
+    Files.resumable.on('fileSuccess', function (file) {
+        var attachedFilesArray = attachedFilesDict.get('array');
+
+        if (!attachedFilesArray) {
+            attachedFilesArray = [];
+        }
+
+        attachedFilesArray.push(file.uniqueIdentifier);
+        attachedFilesDict.set('array', attachedFilesArray);
+        console.log(attachedFilesDict.get('array'));
+        return Session.set(file.uniqueIdentifier, void 0);
+    });
+
+    return Files.resumable.on('fileError', function (file) {
+        return Session.set(file.uniqueIdentifier, void 0);
+    });
+});
+
 Template.newIssue.helpers({
+    numAttachedFiles() {
+        console.log(attachedFilesDict.get('array'));
+        return Files.find({
+            _id: new Mongo.ObjectID(attachedFilesDict.get('array')[0])
+        }).count();
+    },
+    attachements() {
+        return Files.find({_id: new Mongo.ObjectID(attachedFilesDict.get('array')[0])});
+    },
+    link() {
+        result = {path: Files.baseURL + '/md5/' + this.md5, filename: this.filename};
+
+        if (this.filename.indexOf('_Resumable_') >= 0 ) {
+            result = null;
+        }
+
+        return (result);
+    },
+    uploadProgress() {
+        var percent = Session.get("" + this._id._str);
+        var result = void 0;
+
+        if (percent) {
+            var filename = '';
+
+            if (this.metadata._Resumable) {
+                filename = this.metadata._Resumable.resumableFilename;
+            } else {
+                filename = this.filename;
+            }
+
+            result = 'Uploading "' + filename + '": ' + percent + '%';
+        }
+
+        return result;
+    },
     project() {
         return Projects.findOne({'name': activeProject.get()});
     },
@@ -96,6 +211,9 @@ Template.newIssue.helpers({
 });
 
 Template.newIssue.events({
+    'click #a-delete-file'(event, template) {
+        Files.remove({'_id': this._id});
+    },
     'click [id=btn-add-issue]'(event, template) {
         title = template.find('#issue-title').value;
         tracker = template.find('#select-tracker').value;
@@ -117,10 +235,46 @@ Template.newIssue.events({
             }
         }
 
+        descriptionMarkdown = $('#issue-description').val();
+        var reader = new commonmark.Parser();
+        var writer = new commonmark.HtmlRenderer();
+
+        var parsed = reader.parse(descriptionMarkdown);
+        var result = writer.render(parsed);
+
+        var tempResult = $(result);
+        var outerHTML = '';
+        for (i = 0; i < tempResult.length; i++) {
+            if ($(tempResult[i]).find('img')[0]) {
+                var imgSrc = parseImageSrc($(tempResult[i]).find('img').attr('src'));
+                $(tempResult[i])
+                    .html(
+                        '<a href="#nolink" name="a-open-image">' +
+                        $(tempResult[i])
+                            .find('img')
+                            .attr('src', imgSrc.url)
+                            .attr('filename', imgSrc.filename)
+                            .addClass('img-responsive')
+                            .css('max-width', '50%')
+                            .attr('align', 'middle')[0]
+                            .outerHTML
+                        + '</a>'
+                    );
+            }
+        }
+
+        for (i = 0; i < tempResult.length; i++) {
+            if (tempResult[i].outerHTML) {
+                outerHTML += tempResult[i].outerHTML;
+            }
+        }
+
+        descriptionHtml = outerHTML;
+
         if (editIssue.get()) {
-            Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, description, tracker, priority, severity, dueDate, responsible, customFieldsRows);
+            Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows);
         } else {
-            Meteor.call('issues.insert', activeProject.get(), title, description, tracker, priority, severity, dueDate, responsible, customFieldsRows);
+            Meteor.call('issues.insert', activeProject.get(), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows);
         }
 
         target.set('projectPage');

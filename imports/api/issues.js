@@ -7,10 +7,11 @@ export const Issues = new Mongo.Collection('issues');
 
 if (Meteor.isServer) {
     Meteor.methods({
-        'issues.insert'(project, title, description, tracker, priority, severity, dueDate, responsible, customFieldsRows) {
+        'issues.insert'(project, title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows) {
             check(project, String);
             check(title, String);
-            check(description, String);
+            check(descriptionHtml, String);
+            check(descriptionMarkdown, String);
             check(tracker, String);
             check(priority, String);
             check(severity, String);
@@ -22,8 +23,8 @@ if (Meteor.isServer) {
             if (Meteor.user().profile.isRoot
                 || thisProject.noIssueFilingRestrictions
                 || (Meteor.user().username == thisProject.admin)
-                || (thisProject.pmUsers.indexOf(Meteor.user().username) >= 0)) {
-
+                || (thisProject.pmUsers.indexOf(Meteor.user().username) >= 0)
+            ) {
                 var workflow = thisProject.workflow;
                 var participants = [];
 
@@ -46,7 +47,8 @@ if (Meteor.isServer) {
                     number: Issues.find({}).count() + 1,
                     project: project,
                     title: title,
-                    description: description,
+                    descriptionHtml: descriptionHtml,
+                    descriptionMarkdown: descriptionMarkdown,
                     tracker: tracker,
                     priority: priority,
                     severity: severity,
@@ -64,11 +66,12 @@ if (Meteor.isServer) {
                 });
             }
         },
-        'issues.update'(project, issue, title, description, tracker, priority, severity, dueDate, responsible, customFieldsRows) {
+        'issues.update'(project, issue, title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows) {
             check(project, String);
             check(issue, Number);
             check(title, String);
-            check(description, String);
+            check(descriptionHtml, String);
+            check(descriptionMarkdown, String);
             check(tracker, String);
             check(priority, String);
             check(severity, String);
@@ -89,7 +92,8 @@ if (Meteor.isServer) {
                 project: project
             }, {$set: {
                     title: title,
-                    description: description,
+                    descriptionHtml: descriptionHtml,
+                    descriptionMarkdown: descriptionMarkdown,
                     tracker: tracker,
                     priority: priority,
                     severity: severity,
