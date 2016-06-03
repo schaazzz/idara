@@ -70,12 +70,15 @@ Template.newIssue.onRendered(function onRendered() {
 Meteor.startup(function() {
     Files.resumable.on('fileAdded', function (file) {
         Session.set(file.uniqueIdentifier, 0);
+        var attachedFilesArray = attachedFilesDict.get('array');
+        attachedFilesArray.push(new Mongo.ObjectID(file.uniqueIdentifier));
+        attachedFilesDict.set('array', attachedFilesArray);
         return Files.insert({
             _id: file.uniqueIdentifier,
             filename: file.fileName,
             metadata: {
                 author: Meteor.user().username,
-                project: Projects.findOne({'name': activeProject.get()})._id
+                project: Projects.findOne({'name': activeProject.get()})._id,
             },
             contentType: file.file.type
         }, function (error, _id) {
@@ -93,15 +96,6 @@ Meteor.startup(function() {
     });
 
     Files.resumable.on('fileSuccess', function (file) {
-        var attachedFilesArray = attachedFilesDict.get('array');
-
-        if (!attachedFilesArray) {
-            attachedFilesArray = [];
-        }
-
-        attachedFilesArray.push(file.uniqueIdentifier);
-        attachedFilesDict.set('array', attachedFilesArray);
-        console.log(attachedFilesDict.get('array'));
         return Session.set(file.uniqueIdentifier, void 0);
     });
 
@@ -112,13 +106,20 @@ Meteor.startup(function() {
 
 Template.newIssue.helpers({
     numAttachedFiles() {
-        console.log(attachedFilesDict.get('array'));
         return Files.find({
-            _id: new Mongo.ObjectID(attachedFilesDict.get('array')[0])
+            'metadata._Resumable': {$exists: false},
+            'length': {$ne: 0},
+            _id: {
+                $in: attachedFilesDict.get('array')
+            }
         }).count();
     },
     attachements() {
-        return Files.find({_id: new Mongo.ObjectID(attachedFilesDict.get('array')[0])});
+        return Files.find({
+            _id: {
+                $in: attachedFilesDict.get('array')
+            }
+        });
     },
     link() {
         result = {path: Files.baseURL + '/md5/' + this.md5, filename: this.filename};
