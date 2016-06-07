@@ -40,7 +40,7 @@ function parseImageSrc(imageUrl) {
     })._id;
 
     if (url.search('/') < 0) {
-        var file = Files.findOne({filename: url, 'metadata.issue.id': issueId});
+        var file = Files.findOne({filename: url, 'metadata.issue': issueId});
         filename = url;
 
         if (file) {
@@ -93,7 +93,7 @@ Meteor.startup(function() {
 
     Files.resumable.on('fileSuccess', function (file) {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()});
-        
+
         Meteor.call(
             'issues.update',
             activeProject.get(),
