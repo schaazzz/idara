@@ -13,6 +13,8 @@ var currentState = new ReactiveVar(null);
 var stateChangeMsg = new ReactiveVar(null);
 var newStateChangeMsg = new ReactiveVar(null);
 var unblockStateTransition = new ReactiveVar(false);
+var attachedFilesDict = new ReactiveDict('issuePageArray');
+var imUploading = new ReactiveVar(false);
 
 function findStateByName(stateName) {
     var result = null;
@@ -56,17 +58,23 @@ function parseImageSrc(imageUrl) {
 
 Meteor.startup(function() {
     Files.resumable.on('fileAdded', function (file) {
+        if (!imUploading.get()) {
+            return;
+        }
+
         Session.set(file.uniqueIdentifier, 0);
+
+        var attachedFilesArray = attachedFilesDict.get('issuePageArray');
+        attachedFilesArray.push(new Mongo.ObjectID(file.uniqueIdentifier));
+        attachedFilesDict.set('issuePageArray', attachedFilesArray);
+
         return Files.insert({
             _id: file.uniqueIdentifier,
             filename: file.fileName,
             metadata: {
-                issue:  {
-                    id: Issues.findOne({
-                        'number': parseInt(activeIssue.get()),
-                        'project': activeProject.get()
-                    })._id
-                }
+                author: Meteor.user()._id,
+                project: Projects.findOne({'name': activeProject.get()})._id,
+                issue: Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()})._id
             },
             contentType: file.file.type
         }, function (error, _id) {
@@ -84,6 +92,23 @@ Meteor.startup(function() {
     });
 
     Files.resumable.on('fileSuccess', function (file) {
+        var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()});
+        
+        Meteor.call(
+            'issues.update',
+            activeProject.get(),
+            parseInt(activeIssue.get()),
+            thisIssue.title,
+            thisIssue.descriptionHtml,
+            thisIssue.descriptionMarkdown,
+            thisIssue.tracker,
+            thisIssue.priority,
+            thisIssue.severity,
+            thisIssue.dueDate,
+            thisIssue.responsible,
+            thisIssue.customFieldsRows,
+            attachedFilesDict.get('issuePageArray'));
+
         return Session.set(file.uniqueIdentifier, void 0);
     });
 
@@ -93,15 +118,24 @@ Meteor.startup(function() {
     });
 });
 
+Template.issuePage.onDestroyed(function onDestroyed() {
+    imUploading.set(false);
+    Files.resumable.unAssignDrop($("#div-attach-files-to-comment"));
+});
+
 Template.issuePage.onCreated(function onCreated () {
+    var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()});
+    imUploading.set(true);
+    attachedFilesDict.set('issuePageArray', []);
+    attachedFilesDict.set('issuePageArray', thisIssue.attachedFiles);
 });
 
 Template.issuePage.onRendered(function onRendered() {
     var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()});
     var workflow = thisIssue.workflow;
 
-    Files.resumable.assignBrowse($("#a-attach-file"));
-    Files.resumable.assignDrop($("#div-attach-files"));
+    Files.resumable.assignBrowse($("#a-attach-file-to-comment"));
+    Files.resumable.assignDrop($("#div-attach-files-to-comment"));
 
     this.$('#chk-state-complete').radiocheck();
 
@@ -128,17 +162,16 @@ Template.issuePage.helpers({
         return Files.find({
             'metadata._Resumable': {$exists: false},
             'length': {$ne: 0},
-            'metadata.issue.id': Issues.findOne({
-                'number': parseInt(activeIssue.get()),
-                'project': activeProject.get()
-            })._id}).count();
+            _id: {
+                $in: attachedFilesDict.get('issuePageArray')
+            }
+        }).count();
     },
     attachements() {
         return Files.find({
-            'metadata.issue.id': Issues.findOne({
-                'number': parseInt(activeIssue.get()),
-                'project': activeProject.get()
-            })._id
+            _id: {
+                $in: attachedFilesDict.get('issuePageArray')
+            }
         });
     },
     link() {
@@ -173,9 +206,9 @@ Template.issuePage.helpers({
         var thisProject = Projects.findOne({'name': activeProject.get()});
         var workflow = [];
 
-        commentsStateList = []
-        comments = Comments.find({'project': activeProject.get(), 'issue': parseInt(activeIssue.get())}).fetch();
-        prevState = '';
+        var commentsStateList = [];
+        var comments = Comments.find({'project': activeProject.get(), 'issue': parseInt(activeIssue.get())}).fetch();
+        var prevState = '';
         for (var i = 0; i < comments.length; i++) {
             var currentState = comments[i].state;
             if ((prevState != currentState) && (commentsStateList.indexOf(currentState) < 0)) {
@@ -198,6 +231,7 @@ Template.issuePage.helpers({
             } else {
                 workflow = workflow.slice(Math.min.apply(null, commentsStateList), Math.max.apply(null, commentsStateList) + 1)
             }
+
             workflow[0].isFirst = true;
         }
 

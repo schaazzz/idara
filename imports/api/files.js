@@ -25,15 +25,11 @@ if (Meteor.isServer) {
             insert: function(userId, file) {
                 var issueCheckPassed = false;
 
-                console.log(file.metadata.author);
-                console.log(file.metadata.project);
-                console.log(file.metadata.issue);
-
-                project = Projects.findOne({'_id': file.metadata.project});
-                user = Meteor.users.findOne({'_id': userId});
+                var project = Projects.findOne({'_id': file.metadata.project});
+                var user = Meteor.users.findOne({'_id': userId});
 
                 if (file.metadata.issue) {
-                    issue = Issues.findOne({'_id': file.metadata.issue});
+                    var issue = Issues.findOne({'_id': file.metadata.issue});
                     if ((issue.workflow[issue.stateIndex].stateName != 'Open')
                         && (issue.workflow[issue.stateIndex].stateName != 'Closed')
                         && (issue.workflow[issue.stateIndex].hasParticipants)
@@ -49,20 +45,16 @@ if (Meteor.isServer) {
                     issueCheckPassed = true;
                 }
 
-                console.log('--> ', issueCheckPassed);
+                if (user.profile.isRoot
+                    || (project.admin == user.username)
+                    || (project.pmUsers.indexOf(user.username) >= 0)
+                    || project.noIssueFilingRestrictions
+                    || stateCheckPassed
+                ) {
+                    return true;
+                }
 
-                //
-                // if (user.profile.isRoot
-                //     || (project.admin == user.username)
-                //     || (project.pmUsers.indexOf(user.username) >= 0)
-                //
-                //     || stateCheckPassed
-                // ) {
-                //     return true;
-                // }
-                //
-                // return false;
-                return (true);
+                return false;
             },
             read: function(userId, file) {
                 return (true);
@@ -71,21 +63,22 @@ if (Meteor.isServer) {
                 return (true);
             },
             remove: function(userId, file) {
-                // issueId = file.metadata.issue.id;
-                // issue = Issues.findOne({'_id': issueId});
-                // user = Meteor.users.findOne({'_id': userId});
-                // project = Projects.findOne({'name': issue.project});
-                //
-                // if (user.profile.isRoot
-                //     || (project.admin == user.username)
-                //     || (project.pmUsers.indexOf(user.username) >= 0)
-                //     || (issue.responsible == user.username)
-                // ) {
-                //     return true;
-                // }
-                //
-                // return false;
-                return (true);
+                var issueId = file.metadata.issue;
+                var issue = Issues.findOne({'_id': issueId});
+                var user = Meteor.users.findOne({'_id': userId});
+                var project = Projects.findOne({'_id': file.metadata.project});
+
+                if (user.profile.isRoot
+                    || userId == file.metadata.author
+                    || (project.admin == user.username)
+                    || (project.pmUsers.indexOf(user.username) >= 0)
+                    || (issue
+                        && (issue.responsible == user.username))
+                ) {
+                    return true;
+                }
+
+                return false;
             },
         });
     });

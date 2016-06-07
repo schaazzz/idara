@@ -5,8 +5,9 @@ import {Issues} from '../api/issues';
 import { Files } from '../api/files';
 import './new-issue.html';
 
-customFieldsRowsGlobal = new ReactiveVar();
-attachedFilesDict = new ReactiveDict('array');
+var customFieldsRowsGlobal = new ReactiveVar();
+var attachedFilesDict = new ReactiveDict('newIssueArray');
+var imUploading = new ReactiveVar(false);
 
 function parseImageSrc(imageUrl) {
     var url = imageUrl;
@@ -34,17 +35,23 @@ function parseImageSrc(imageUrl) {
     };
 }
 
-Template.newIssue.onRendered(function onCreated() {
-    attachedFilesDict.set('array', []);
+Template.newIssue.onDestroyed(function onDestroyed() {
+    imUploading.set(false);
+    Files.resumable.unAssignDrop($("#div-attach-files-to-issue"));
+});
+
+Template.newIssue.onCreated(function onCreated() {
+    imUploading.set(true);
+    attachedFilesDict.set('newIssueArray', []);
 });
 
 Template.newIssue.onRendered(function onRendered() {
 
-    Files.resumable.assignBrowse($("#a-attach-file"));
-    Files.resumable.assignDrop($("#div-attach-files"));
+    Files.resumable.assignBrowse($("#a-attach-file-to-issue"));
+    Files.resumable.assignDrop($("#div-attach-files-to-issue"));
 
     if (editIssue.get()) {
-        var thisIssue = Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())});
+        var thisIssue =  Issues.findOne({'project': activeProject.get(), 'number': parseInt(activeIssue.get())});
         this.$('#issue-title').val(thisIssue.title);
         this.$('#select-tracker').val(thisIssue.tracker);
         this.$('#select-priority').val(thisIssue.priority);
@@ -52,6 +59,7 @@ Template.newIssue.onRendered(function onRendered() {
         this.$('#due-date').val(thisIssue.dueDate);
         this.$('#select-responsible').val(thisIssue.responsible);
         this.$('#issue-description').val(thisIssue.descriptionMarkdown);
+        attachedFilesDict.set('newIssueArray', thisIssue.attachedFiles)
 
         var customFieldsRows = thisIssue.customFieldsRows;
 
@@ -69,16 +77,23 @@ Template.newIssue.onRendered(function onRendered() {
 
 Meteor.startup(function() {
     Files.resumable.on('fileAdded', function (file) {
+        if (!imUploading.get()) {
+            return;
+        }
+
         Session.set(file.uniqueIdentifier, 0);
-        var attachedFilesArray = attachedFilesDict.get('array');
+
+        var attachedFilesArray = attachedFilesDict.get('newIssueArray');
         attachedFilesArray.push(new Mongo.ObjectID(file.uniqueIdentifier));
-        attachedFilesDict.set('array', attachedFilesArray);
+        attachedFilesDict.set('newIssueArray', attachedFilesArray);
+
         return Files.insert({
             _id: file.uniqueIdentifier,
             filename: file.fileName,
             metadata: {
-                author: Meteor.user().username,
+                author: Meteor.user()._id,
                 project: Projects.findOne({'name': activeProject.get()})._id,
+                issue: void 0
             },
             contentType: file.file.type
         }, function (error, _id) {
@@ -110,14 +125,14 @@ Template.newIssue.helpers({
             'metadata._Resumable': {$exists: false},
             'length': {$ne: 0},
             _id: {
-                $in: attachedFilesDict.get('array')
+                $in: attachedFilesDict.get('newIssueArray')
             }
         }).count();
     },
     attachements() {
         return Files.find({
             _id: {
-                $in: attachedFilesDict.get('array')
+                $in: attachedFilesDict.get('newIssueArray')
             }
         });
     },
@@ -273,9 +288,9 @@ Template.newIssue.events({
         descriptionHtml = outerHTML;
 
         if (editIssue.get()) {
-            Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows);
+            Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows, attachedFilesDict.get('newIssueArray'));
         } else {
-            Meteor.call('issues.insert', activeProject.get(), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows);
+            Meteor.call('issues.insert', activeProject.get(), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows, attachedFilesDict.get('newIssueArray'));
         }
 
         target.set('projectPage');
