@@ -13,13 +13,10 @@ function parseImageSrc(imageUrl) {
     var url = imageUrl;
     var filename = url;
 
-    var issueId = Issues.findOne({
-        'number': parseInt(activeIssue.get()),
-        'project': activeProject.get()
-    })._id;
+    var projectId = Projects.findOne({'name': activeProject.get()})._id;
 
     if (url.search('/') < 0) {
-        var file = Files.findOne({filename: url, 'metadata.issue.id': issueId});
+        var file = Files.findOne({filename: url, 'metadata.project': projectId});
         filename = url;
 
         if (file) {
@@ -231,14 +228,13 @@ Template.newIssue.events({
         Files.remove({'_id': this._id});
     },
     'click [id=btn-add-issue]'(event, template) {
-        title = template.find('#issue-title').value;
-        tracker = template.find('#select-tracker').value;
-        priority = template.find('#select-priority').value;
-        severity = template.find('#select-severity').value;
-        dueDate = template.find('#due-date').value;
-        responsible = template.find('#select-responsible :selected').text;
-        description = template.find('#issue-description').value;
-
+        var title = template.find('#issue-title').value;
+        var tracker = template.find('#select-tracker').value;
+        var priority = template.find('#select-priority').value;
+        var severity = template.find('#select-severity').value;
+        var dueDate = template.find('#due-date').value;
+        var responsible = template.find('#select-responsible :selected').text;
+        var description = template.find('#issue-description').value;
         var customFieldsRows = customFieldsRowsGlobal.get();
 
         if (customFieldsRows) {
@@ -251,7 +247,7 @@ Template.newIssue.events({
             }
         }
 
-        descriptionMarkdown = $('#issue-description').val();
+        var descriptionMarkdown = $('#issue-description').val();
         var reader = new commonmark.Parser();
         var writer = new commonmark.HtmlRenderer();
 
@@ -285,7 +281,7 @@ Template.newIssue.events({
             }
         }
 
-        descriptionHtml = outerHTML;
+        var descriptionHtml = outerHTML;
 
         if (editIssue.get()) {
             Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows, attachedFilesDict.get('newIssueArray'));
