@@ -43,6 +43,17 @@
                         <a id="btn-bell" href="#nolink"><span class="glyphicon glyphicon-bell"></span></a>
                     </li>
                 </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+                    <form class="navbar-form" role="search">
+                        <div class="input-group">
+                            <input type="text" class="form-control input-custom-focus" placeholder="Search..." id="input-search-issue">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" id="btn-search-issue"><i class="glyphicon glyphicon-search"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </ul>
             </nav>
             {{> Template.dynamic template=targetTemplate data=this}}
         {{/if}}

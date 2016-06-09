@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Accounts } from 'meteor/accounts-base';
+import { Issues } from '../api/issues';
 import './login';
 import './cpanel';
 import './user-page';
@@ -51,6 +52,11 @@ Template.body.helpers({
 });
 
 Template.body.events({
+    'click #btn-search-issue'(event, template){
+        console.log('-->', $('#input-search-issue').val());
+        var a = Issues.find({title: {$regex: $('#input-search-issue').val()}}).fetch();
+        console.log(a, a.length);
+    },
     'click [id=btn-cpanel]'(event, template) {
         if (Meteor.user().profile.isRoot) {
             target.set('controlPanel');

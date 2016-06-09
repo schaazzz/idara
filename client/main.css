@@ -69,3 +69,12 @@ hr {
 
 .col-issue-field {
 }
+
+.input-custom-focus {
+}
+
+.input-custom-focus:focus {
+    color: #ffffff !important;
+    border: 1px !important;
+    border-color: #526a82 !important;
+}
