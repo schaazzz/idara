@@ -12,6 +12,7 @@ import './project-page';
 import './new-issue';
 import './issue-page';
 import './edit-workflow';
+import './search-results';
 import './body.html';
 
 loggedIn = new ReactiveVar(true);
@@ -22,6 +23,7 @@ workflow = new ReactiveVar('default');
 activeWorkflow = new ReactiveVar(null);
 newWorkflow = new ReactiveVar(false);
 activeUserPage = new ReactiveVar(null);
+searchTerm = new ReactiveVar(null);
 
 Template.body.onCreated(function onCreated() {
     this.state = new ReactiveDict();
@@ -52,10 +54,9 @@ Template.body.helpers({
 });
 
 Template.body.events({
-    'click #btn-search-issue'(event, template){
-        console.log('-->', $('#input-search-issue').val());
-        var a = Issues.find({title: {$regex: $('#input-search-issue').val()}}).fetch();
-        console.log(a, a.length);
+    'click #btn-search-issue'(event, template) {
+        searchTerm.set($('#input-search-issue').val());
+        target.set('searchResults');
     },
     'click [id=btn-cpanel]'(event, template) {
         if (Meteor.user().profile.isRoot) {
