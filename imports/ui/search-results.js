@@ -11,4 +11,17 @@ Template.searchResults.helpers({
 });
 
 Template.searchResults.events({
+    'click [name=open-issue-page]'(event, template) {
+        var project = event.target.id;
+        var issue = project.split(':')[1];
+
+        project = project.split(':')[0];
+        activeProject.set(project);
+        activeIssue.set(issue);
+        target.set('issuePage');
+    },
+    'click [name=open-project-page]'(event, template) {
+        activeProject.set(event.target.id);
+        target.set('projectPage');
+    }
 });

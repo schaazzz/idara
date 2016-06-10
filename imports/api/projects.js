@@ -48,30 +48,36 @@ if (Meteor.isServer) {
                 xmlDoc = result;
             });
 
-            for (var i = 0; i < xmlDoc.customFields['input'].length; i++) {
-                customFields['input_' + xmlDoc.customFields['input'][i].$.name] = {
-                    title: xmlDoc.customFields['input'][i].$.title
-                };
+            if (xmlDoc.customFields.input) {
+                for (var i = 0; i < xmlDoc.customFields['input'].length; i++) {
+                    customFields['input_' + xmlDoc.customFields['input'][i].$.name] = {
+                        title: xmlDoc.customFields['input'][i].$.title
+                    };
+                }
             }
 
-            for (var i = 0; i < xmlDoc.customFields['select'].length; i++) {
-                customFields['select_' + xmlDoc.customFields['select'][i].$.name] = {
-                    title: xmlDoc.customFields['select'][i].$.title,
-                    options: xmlDoc.customFields['select'][i]._
-                };
+            if (xmlDoc.customFields.select) {
+                for (var i = 0; i < xmlDoc.customFields['select'].length; i++) {
+                    customFields['select_' + xmlDoc.customFields['select'][i].$.name] = {
+                        title: xmlDoc.customFields['select'][i].$.title,
+                        options: xmlDoc.customFields['select'][i]._
+                    };
+                }
             }
 
             if (Meteor.user().profile.isRoot || (Meteor.user().username == thisProject.admin)) {
                 Projects.update(
-                    {'_id': _id},
-                    {$set: {
-                        'name': name,
-                        'description': description,
-                        'admin': admin,
-                        'pmUsers': pmUsers,
-                        'noIssueFilingRestrictions': noIssueFilingRestrictions,
-                        'customFields': customFields
-                    }}
+                    {'_id': _id}, {
+                        $set: {
+                            'name': name,
+                            'description': description,
+                            'admin': admin,
+                            'pmUsers': pmUsers,
+                            'noIssueFilingRestrictions': noIssueFilingRestrictions,
+                            'customFieldsXml': customFieldsXml,
+                            'customFields': customFields
+                        }
+                    }
                 );
             } else {
                 throw new Meteor.Error('not-authorized');

@@ -6,12 +6,6 @@ import './config-project.html';
 var xmlEditor = null;
 var thisProject = null;
 var pmUsersUpdated = new ReactiveVar(true);
-var xmlStr =
-`<customFields>
-<input name="something" title="This is an input"/>
-<select name="something" title="Something">Option 0, Option 1</select>
-<select name="something_else" title="Something">Option 2, Option 3</select>
-</customFields>`;
 
 Template.configProject.onCreated( function onCreated() {
     thisProject = Projects.findOne({'name': activeProject.get()})
@@ -37,15 +31,17 @@ Template.configProject.onRendered(function onRendered() {
     $(".CodeMirror").css('border', '2px solid #1abc9c');
     $(".CodeMirror").css('border-radius', '5px');
 
-    var xmlDoc = $($.parseXML(xmlStr));
-    var original = new XMLSerializer().serializeToString(xmlDoc[0]);
+    if (thisProject.customFieldsXml) {
+        var xmlDoc = $($.parseXML(thisProject.customFieldsXml));
+        var original = new XMLSerializer().serializeToString(xmlDoc[0]);
 
-    xmlEditor.setValue(original);
-    xmlEditor.execCommand('selectAll');
-    xmlEditor.execCommand('indentAuto');
-    xmlEditor.execCommand('goDocStart');
+        xmlEditor.setValue(original);
+        xmlEditor.execCommand('selectAll');
+        xmlEditor.execCommand('indentAuto');
+        xmlEditor.execCommand('goDocStart');
+    }
+
     xmlEditor.setSize('100%', '350');
-    console.log(xmlEditor.getValue());
 });
 
 Template.configProject.helpers({
