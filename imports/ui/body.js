@@ -54,6 +54,15 @@ Template.body.helpers({
     projects() {
         return Projects.find({}, {'_id': 0, 'name': 1, description: '1'});
     },
+    activeProject() {
+        result = 'Projects';
+
+        if (activeProject.get()) {
+            result = activeProject.get();
+        }
+
+        return result;
+    }
 });
 
 Template.body.events({

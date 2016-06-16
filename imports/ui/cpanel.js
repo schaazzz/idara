@@ -35,6 +35,7 @@ var defaultWorkflow =
 }`;
 
 Template.controlPanel.onCreated(function onCreated() {
+    activeProject.set(void 0);
     if (Workflows.findOne({'name': 'default'})) {
     } else {
         Meteor.call('workflows.insert', JSON.parse(defaultWorkflow));

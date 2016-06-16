@@ -4,6 +4,10 @@ import { Projects } from '../api/projects';
 import { Issues } from '../api/issues';
 import './user-page.html';
 
+Template.userPage.onCreated(function onCreated() {
+    activeProject.set(void 0);
+});
+
 Template.userPage.helpers({
     taskCount(category) {
         var count = 0;
