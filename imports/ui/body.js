@@ -9,6 +9,7 @@ import './cpanel';
 import './user-page';
 import './config-project';
 import './project-page';
+import './project-stats';
 import './new-issue';
 import './issue-page';
 import './edit-workflow';
