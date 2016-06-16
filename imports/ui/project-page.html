@@ -54,11 +54,11 @@
                 <tbody>
                     {{#each issue in issues}}
                         <tr>
-                            <td><a name="open-issue-page" href="#nolink" id="{{issue.number}}">{{issue.number}}</a></td>
-                            <td><a name="open-issue-page" href="#nolink" id="{{issue.number}}">{{issue.title}}</a></td>
+                            <td><a name="a-issue-page" href="#nolink" id="{{issue.number}}">{{issue.number}}</a></td>
+                            <td><a name="a-issue-page" href="#nolink" id="{{issue.number}}">{{issue.title}}</a></td>
                             <td>{{issue.tracker}}</td>
-                            <td>{{issue.stateStr}}</td>
-                            <td><a name="open-user-page" href="#nolink" id="{{issue.responsible}}">{{issue.responsible}}</a></td>
+                            <td>{{issue.state}}</td>
+                            <td><a name="a-user-id" href="#nolink" id="{{issue.responsible}}">{{issue.responsible}}</a></td>
                             <td>{{issue.dueDate}}</td>
                             <td>{{issue.createdAt}}</td>
                         </tr>

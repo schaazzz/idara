@@ -2,11 +2,11 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Accounts } from 'meteor/accounts-base';
+import {Projects} from '../api/projects';
 import { Issues } from '../api/issues';
 import './login';
 import './cpanel';
 import './user-page';
-import './projects';
 import './config-project';
 import './project-page';
 import './new-issue';
@@ -50,7 +50,10 @@ Template.body.helpers({
     },
     targetTemplate() {
         return target.get();
-    }
+    },
+    projects() {
+        return Projects.find({}, {'_id': 0, 'name': 1, description: '1'});
+    },
 });
 
 Template.body.events({
@@ -75,4 +78,8 @@ Template.body.events({
         activeUserPage.set(Meteor.user().username);
         target.set('userPage');
     },
+    'click [name=open-project-page]': function (event, template) {
+        activeProject.set(event.target.id);
+        target.set('projectPage');
+    }
 });

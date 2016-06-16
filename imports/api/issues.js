@@ -55,7 +55,7 @@ if (Meteor.isServer) {
                     createdBy: Meteor.user().username,
                     responsible: responsible,
                     stateIndex: 0,
-                    stateStr: workflow[0].stateName,
+                    state: workflow[0].stateName,
                     isClosed: false,
                     workflow: workflow,
                     createdAt: moment(new Date()).format("YYYY-MM-DD HH:mm"),
@@ -136,7 +136,7 @@ if (Meteor.isServer) {
                         $set: {
                             'stateIndex': thisIssue.stateIndex,
                             'isClosed': thisIssue.isClosed,
-                            'stateStr': thisIssue.workflow[thisIssue.stateIndex].stateName,
+                            'state': thisIssue.workflow[thisIssue.stateIndex].stateName,
                             'history': thisIssue.history,
                         }
                     });
@@ -175,7 +175,7 @@ if (Meteor.isServer) {
                     $set: {
                         'stateIndex': thisIssue.stateIndex,
                         'isClosed': thisIssue.isClosed,
-                        'stateStr': thisIssue.workflow[thisIssue.stateIndex].stateName,
+                        'state': thisIssue.workflow[thisIssue.stateIndex].stateName,
                         'history': thisIssue.history,
                     }
                 });

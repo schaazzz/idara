@@ -45,9 +45,13 @@ Template.projectPage.events({
         editIssue.set(false);
         target.set('newIssue');
     },
-    'click [name=open-issue-page]'(event, template) {
+    'click [name=a-issue-page]'(event, template) {
         activeIssue.set(event.target.id);
         target.set('issuePage');
+    },
+    'click [name=a-user-id]'(event, template) {
+         activeUserPage.set(event.target.id);
+         target.set('userPage');
     },
     'click [id=a-config-project]'(event, template) {
         target.set('configProject');
