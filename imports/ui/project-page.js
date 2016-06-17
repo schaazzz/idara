@@ -55,5 +55,8 @@ Template.projectPage.events({
     },
     'click [id=a-config-project]'(event, template) {
         target.set('configProject');
+    },
+    'click [id=a-project-stats]'(event, template) {
+        target.set('projectStats');
     }
 });

@@ -74,6 +74,7 @@ reactive-var@1.0.10
 reload@1.1.9
 retry@1.0.8
 routepolicy@1.0.11
+schaazzz:charts@0.0.2
 service-configuration@1.0.10
 session@1.1.6
 sha@1.0.8
