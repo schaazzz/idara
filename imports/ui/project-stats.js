@@ -62,16 +62,47 @@ Template.projectStats.onRendered(function onRendered() {
     });
 
     let history = History.findOne({'project': activeProject.get()});
+    let stateDataset = {labels: [], datasets: []};
+    let trackerDataset = {labels: [], datasets: []};
+    let priorityDataset = {labels: [], datasets: []};
+    let severityDataset = {labels: [], datasets: []};
+
     console.log(history.data);
-    Object.keys(history.data).forEach(function (date) {
-        console.log('==>', date);
-        Object.keys(history.data[date]).forEach(function (count) {
-            console.log('====>', count);
-            Object.keys(history.data[date][count]).forEach(function (values) {
-                console.log('=========>', history.data[date][count][values]);
+
+    Object.keys(history.data).forEach(function (entry) {
+        console.log(i);
+        Object.keys(history.data[entry]).forEach(function (date) {
+            let datasetCopy;
+            if (entry == 'countPerStates') {
+                datasetCopy = stateDataset;
+            } else if (entry == 'countPerTrackers') {
+                datasetCopy  = trackerDataset;
+            } else if (entry == 'countPerPriority') {
+                datasetCopy  = priorityDataset;
+            } else if (entry == 'countPerSeverity') {
+                datasetCopy  = severityDataset;
+            }
+
+            datasetCopy.labels.push(date);
+            Object.keys(history.data[entry][date]).forEach(function (count, index) {
+                let tempDataset;
+
+                if (datasetCopy.datasets[index]) {
+                    tempDataset = datasetCopy.datasets[index];
+                } else {
+                    tempDataset = {label: count, data: []};
+                }
+
+                tempDataset.data.push(history.data[entry][date][count]);
+                datasetCopy.datasets[index] = tempDataset;
             });
         });
     });
+
+    console.log('0', stateDataset);
+    console.log('1', trackerDataset);
+    console.log('2', priorityDataset);
+    console.log('3', severityDataset);
 });
 
 Template.projectStats.helpers({
