@@ -8,6 +8,18 @@ import './project-stats.html';
 Template.projectStats.onCreated(function onCreated() {
 });
 
+function convertRgb2Rgba(color, alpha) {
+    let r = color[1] + color[2];
+    let g = color[3] + color[4];
+    let b = color[5] + color[6];
+
+    r = parseInt('0x' + r).toString();
+    g = parseInt('0x' + g).toString();
+    b = parseInt('0x' + b).toString();
+
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
 Template.projectStats.onRendered(function onRendered() {
     var colors = [
         '#4682B4', '#FF6347', '#FFDAB9', '#FFA500', '#32CD32',
@@ -66,6 +78,25 @@ Template.projectStats.onRendered(function onRendered() {
     let trackerDataset = {labels: [], datasets: []};
     let priorityDataset = {labels: [], datasets: []};
     let severityDataset = {labels: [], datasets: []};
+    const lineChartOption = {
+        fill: false,
+        lineTension: 0.1,
+        // backgroundColor: "rgba(75,192,192,0.4)",
+        // borderColor: "rgba(75,192,192,1)",
+        borderCapStyle: 'butt',
+        borderDash: [],
+        borderDashOffset: 0.0,
+        borderJoinStyle: 'miter',
+        // pointBorderColor: "rgba(75,192,192,1)",
+        pointBackgroundColor: "#fff",
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
+        // pointHoverBackgroundColor: "rgba(75,192,192,1)",
+        pointHoverBorderColor: "rgba(220,220,220,1)",
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+    };
 
     console.log(history.data);
 
