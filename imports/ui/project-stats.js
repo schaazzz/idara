@@ -5,7 +5,32 @@ import {Issues} from '../api/issues';
 import {History} from '../api/history';
 import './project-stats.html';
 
+const lineChartOptions = {
+    fill: false,
+    lineTension: 0.1,
+    borderCapStyle: 'butt',
+    borderDash: [],
+    borderDashOffset: 0.0,
+    borderJoinStyle: 'miter',
+    pointBackgroundColor: "#fff",
+    pointBorderWidth: 1,
+    pointHoverRadius: 5,
+    pointHoverBorderColor: "rgba(220,220,220,1)",
+    pointHoverBorderWidth: 2,
+    pointRadius: 1,
+    pointHitRadius: 10,
+};
+
+let stateDataset;
+let trackerDataset;
+let priorityDataset;
+let severityDataset;
+
 Template.projectStats.onCreated(function onCreated() {
+    stateDataset = {labels: [], datasets: []};
+    trackerDataset = {labels: [], datasets: []};
+    priorityDataset = {labels: [], datasets: []};
+    severityDataset = {labels: [], datasets: []};
 });
 
 function convertRgb2Rgba(color, alpha) {
@@ -74,34 +99,8 @@ Template.projectStats.onRendered(function onRendered() {
     });
 
     let history = History.findOne({'project': activeProject.get()});
-    let stateDataset = {labels: [], datasets: []};
-    let trackerDataset = {labels: [], datasets: []};
-    let priorityDataset = {labels: [], datasets: []};
-    let severityDataset = {labels: [], datasets: []};
-    const lineChartOption = {
-        fill: false,
-        lineTension: 0.1,
-        // backgroundColor: "rgba(75,192,192,0.4)",
-        // borderColor: "rgba(75,192,192,1)",
-        borderCapStyle: 'butt',
-        borderDash: [],
-        borderDashOffset: 0.0,
-        borderJoinStyle: 'miter',
-        // pointBorderColor: "rgba(75,192,192,1)",
-        pointBackgroundColor: "#fff",
-        pointBorderWidth: 1,
-        pointHoverRadius: 5,
-        // pointHoverBackgroundColor: "rgba(75,192,192,1)",
-        pointHoverBorderColor: "rgba(220,220,220,1)",
-        pointHoverBorderWidth: 2,
-        pointRadius: 1,
-        pointHitRadius: 10,
-    };
 
-    console.log(history.data);
-
-    Object.keys(history.data).forEach(function (entry) {
-        console.log(i);
+    Object.keys(history.data).forEach(function (entry, uberIndex) {
         Object.keys(history.data[entry]).forEach(function (date) {
             let datasetCopy;
             if (entry == 'countPerStates') {
@@ -126,6 +125,15 @@ Template.projectStats.onRendered(function onRendered() {
 
                 tempDataset.data.push(history.data[entry][date][count]);
                 datasetCopy.datasets[index] = tempDataset;
+
+                Object.keys(lineChartOptions).forEach(function (attr) {
+                    datasetCopy.datasets[index][attr] = lineChartOptions[attr];
+                });
+
+                datasetCopy.datasets[index]['backgroundColor'] = convertRgb2Rgba(colors[index], 0.4);
+                datasetCopy.datasets[index]['borderColor'] = convertRgb2Rgba(colors[index], 1);
+                datasetCopy.datasets[index]['pointBorderColor'] = convertRgb2Rgba(colors[index], 1);
+                datasetCopy.datasets[index]['pointHoverBackgroundColor'] = convertRgb2Rgba(colors[index], 1);
             });
         });
     });
@@ -134,6 +142,19 @@ Template.projectStats.onRendered(function onRendered() {
     console.log('1', trackerDataset);
     console.log('2', priorityDataset);
     console.log('3', severityDataset);
+
+    var ctx1 = document.getElementById("canvas-issue-stats").getContext("2d");
+    var myLineChart = new Chart(ctx1, {
+        type: 'line',
+        data: priorityDataset,
+        options: {
+            scales: {
+                xAxes: [{
+                    display: true
+                }]
+            }
+        }
+    });
 });
 
 Template.projectStats.helpers({
