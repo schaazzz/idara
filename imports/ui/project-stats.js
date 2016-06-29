@@ -46,16 +46,14 @@ function convertRgb2Rgba(color, alpha) {
 }
 
 Template.projectStats.onRendered(function onRendered() {
-    var colors = [
+    const colors = [
         '#4682B4', '#FF6347', '#FFDAB9', '#FFA500', '#32CD32',
         '#800080', '#808080', '#F0E68C', '#CD5C5C', '#E0FFFF',
         '#008000', '#0000FF', '#800000', '#808000', '#C71585',
         '#CD853F', '#FF4500', '#FFFF00', '#FF69B4', '#DDA0DD',
     ];
 
-    var workflow = Projects.findOne({'name': activeProject.get()}).workflow;
-
-    var issueData = {
+    let issueData = {
         labels: [],
         datasets: [{
             data: [],
@@ -64,29 +62,82 @@ Template.projectStats.onRendered(function onRendered() {
         }]
     };
 
-    for (var i = 0; i < workflow.length - 1; i++) {
+    let count = 0;
+    let totalCount = {};
+    let workflow = Projects.findOne({'name': activeProject.get()}).workflow;
+    for (let i = 0; i < workflow.length - 1; i++) {
         issueData.labels.push(workflow[i].stateName);
 
-        var issues = Issues.find({'project': activeProject.get(), 'state': workflow[i].stateName});
+        let issues = Issues.find({'project': activeProject.get(), 'state': workflow[i].stateName});
 
-        var count = 0;
         if (issues) {
             count = issues.count();
         }
+
+        totalCount[workflow[i].stateName] = {count: count, visible: true};
 
         issueData.datasets[0].data.push(count);
         issueData.datasets[0].backgroundColor.push(colors[i]);
         issueData.datasets[0].hoverBackgroundColor.push(colors[i]);
     }
 
-    var ctx0 = document.getElementById("myChart0").getContext("2d");
-    ctx0.height = 200;
+    let doughnutChartBase = Chart.controllers.doughnut.prototype.draw;
+    Chart.helpers.extend(Chart.controllers.doughnut.prototype, {
+        showTooltip: function() {
+            let chart = this.chart;
+            let ctx = chart.chart.ctx;
+            ctx.save();
+            doughnutChartBase.showTooltip.apply(this, arguments);
+            ctx.restore();
+        },
+        draw: function() {
+            doughnutChartBase.apply(this, arguments);
+            let chart = this.chart;
+            let ctx = chart.chart.ctx;
 
-    var myDoughnutChart0 = new Chart(ctx0, {
-        type: 'pie',
+            let width = chart.chart.width;
+            let height = chart.chart.height;
+
+            let fontSize = (height / 100).toFixed(2);
+
+    		ctx.fillStyle = 'Black';
+            ctx.font = fontSize + "em Verdana";
+            ctx.textBaseline = "middle";
+
+            let count = 0;
+            Object.keys(totalCount).forEach(function (key) {
+                if (totalCount[key].visible) {
+                    count += totalCount[key].count;
+                }
+            });
+            let text = count;
+            let textX = Math.round((width - ctx.measureText(text).width) / 2);
+            let textY = height / 2.25;
+
+            ctx.fillText(text, textX, textY);
+        }
+    });
+
+    let ctxOpenIssues = document.getElementById("canvas-open-issues").getContext("2d");
+    ctxOpenIssues.height = 200;
+
+    let openIssuesDoughnutChart = new Chart(ctxOpenIssues, {
+        type: 'doughnut',
         data: issueData,
         options: {
             legend: {
+                onClick: function (event, legendItem) {
+                    var index = legendItem.index;
+    				var chart = this.chart;
+    				var i, ilen, meta;
+    				for (i = 0, ilen = (chart.data.datasets || []).length; i < ilen; ++i) {
+    					meta = chart.getDatasetMeta(i);
+    					meta.data[index].hidden = !meta.data[index].hidden;
+    				}
+
+    				chart.update();
+                    totalCount[legendItem.text].visible = legendItem.hidden;
+                },
                 fullWidth: true,
                 position: 'bottom',
                 labels: {
@@ -99,7 +150,6 @@ Template.projectStats.onRendered(function onRendered() {
     });
 
     let history = History.findOne({'project': activeProject.get()});
-
     Object.keys(history.data).forEach(function (entry, uberIndex) {
         Object.keys(history.data[entry]).forEach(function (date) {
             let datasetCopy;
@@ -138,45 +188,26 @@ Template.projectStats.onRendered(function onRendered() {
         });
     });
 
-    console.log('0', stateDataset);
-    console.log('1', trackerDataset);
-    console.log('2', priorityDataset);
-    console.log('3', severityDataset);
-
-    var ctx1 = document.getElementById("canvas-issue-stats").getContext("2d");
-    var myLineChart = new Chart(ctx1, {
+    let ctxIssueStats = document.getElementById("canvas-issue-stats").getContext("2d");
+    let issueStatsLineChart = new Chart(ctxIssueStats, {
         type: 'line',
         data: priorityDataset,
         options: {
-            scales: {
-                xAxes: [{
-                    display: true
-                }]
+            legend: {
+                fullWidth: true,
+                position: 'bottom',
+                labels: {
+                    boxWidth: 13,
+                    fontSize: 13,
+                    padding: 7,
+                }
             }
         }
     });
 });
 
 Template.projectStats.helpers({
-    count() {
-        var workflow = Projects.findOne({'name': activeProject.get()}).workflow;
-        var totalCount = 0;
-
-        for (var i = 0; i < workflow.length - 1; i++) {
-            var count = 0;
-            var issues = Issues.find({'project': activeProject.get(), 'state': workflow[i].stateName});
-            if (issues) {
-                count = issues.count();
-            }
-
-            totalCount += count;
-        }
-
-        return (totalCount);
-    }
-
 });
 
 Template.projectStats.events({
-
 });
