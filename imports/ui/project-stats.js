@@ -112,8 +112,14 @@ Template.projectStats.onRendered(function onRendered() {
             });
             let text = count;
             let textX = Math.round((width - ctx.measureText(text).width) / 2);
-            let textY = height / 2.25;
+            let textY = height / 1.75;
 
+            ctx.fillText(text, textX, textY);
+
+            text = 'Unresolved Issues';
+            ctx.font = "1em Verdana";
+            textX = 0;
+            textY = height - 15;
             ctx.fillText(text, textX, textY);
         }
     });
@@ -139,7 +145,7 @@ Template.projectStats.onRendered(function onRendered() {
                     totalCount[legendItem.text].visible = legendItem.hidden;
                 },
                 fullWidth: true,
-                position: 'bottom',
+                position: 'top',
                 labels: {
                     boxWidth: 13,
                     fontSize: 13,
