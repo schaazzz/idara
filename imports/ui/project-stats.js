@@ -25,13 +25,8 @@ let stateDataset;
 let trackerDataset;
 let priorityDataset;
 let severityDataset;
-
-Template.projectStats.onCreated(function onCreated() {
-    stateDataset = {labels: [], datasets: []};
-    trackerDataset = {labels: [], datasets: []};
-    priorityDataset = {labels: [], datasets: []};
-    severityDataset = {labels: [], datasets: []};
-});
+let totalCount;
+let totalCountInitialized = false;
 
 function convertRgb2Rgba(color, alpha) {
     let r = color[1] + color[2];
@@ -44,6 +39,64 @@ function convertRgb2Rgba(color, alpha) {
 
     return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
 }
+
+let doughnutChartBase = Chart.controllers.doughnut.prototype.draw;
+Chart.helpers.extend(Chart.controllers.doughnut.prototype, {
+    showTooltip: function() {
+        let chart = this.chart;
+        let ctx = chart.chart.ctx;
+        ctx.save();
+        doughnutChartBase.showTooltip.apply(this, arguments);
+        ctx.restore();
+    },
+    draw: function() {
+        doughnutChartBase.apply(this, arguments);
+        let chart = this.chart;
+        let ctx = chart.chart.ctx;
+
+        let width = chart.chart.width;
+        let height = chart.chart.height;
+
+        let fontSize = (height / 90).toFixed(2);
+
+        ctx.fillStyle = '#34495e';
+        ctx.font = 'bold ' +fontSize + "em Lato, Helvetica, Arial, sans-serif";
+        ctx.textBaseline = "middle";
+
+        let count = 0;
+        Object.keys(totalCount).forEach(function (key) {
+            if (totalCount[key].visible) {
+                count += totalCount[key].count;
+            }
+        });
+        let text = count;
+        let textX = Math.round((width - ctx.measureText(text).width) / 2);
+        let textY = height / 2.35;
+
+        if (totalCountInitialized) {
+            ctx.fillText(text, textX, textY);
+        }
+
+        text = 'Unresolved';
+        ctx.font = "bold 24px Lato, Helvetica, Arial, sans-serif";
+        textX = 25;
+        textY = 25;
+        ctx.fillText(text, textX, textY);
+
+        text = 'Issues';
+        textY = 45;
+        ctx.fillText(text, textX, textY);
+
+    }
+});
+
+Template.projectStats.onCreated(function onCreated() {
+    stateDataset = {labels: [], datasets: []};
+    trackerDataset = {labels: [], datasets: []};
+    priorityDataset = {labels: [], datasets: []};
+    severityDataset = {labels: [], datasets: []};
+    totalCount = {};
+});
 
 Template.projectStats.onRendered(function onRendered() {
     const colors = [
@@ -63,7 +116,6 @@ Template.projectStats.onRendered(function onRendered() {
     };
 
     let count = 0;
-    let totalCount = {};
     let workflow = Projects.findOne({'name': activeProject.get()}).workflow;
     for (let i = 0; i < workflow.length - 1; i++) {
         issueData.labels.push(workflow[i].stateName);
@@ -81,52 +133,11 @@ Template.projectStats.onRendered(function onRendered() {
         issueData.datasets[0].hoverBackgroundColor.push(colors[i]);
     }
 
-    let doughnutChartBase = Chart.controllers.doughnut.prototype.draw;
-    Chart.helpers.extend(Chart.controllers.doughnut.prototype, {
-        showTooltip: function() {
-            let chart = this.chart;
-            let ctx = chart.chart.ctx;
-            ctx.save();
-            doughnutChartBase.showTooltip.apply(this, arguments);
-            ctx.restore();
-        },
-        draw: function() {
-            doughnutChartBase.apply(this, arguments);
-            let chart = this.chart;
-            let ctx = chart.chart.ctx;
+    totalCountInitialized = true;
 
-            let width = chart.chart.width;
-            let height = chart.chart.height;
-
-            let fontSize = (height / 100).toFixed(2);
-
-    		ctx.fillStyle = 'Black';
-            ctx.font = fontSize + "em Verdana";
-            ctx.textBaseline = "middle";
-
-            let count = 0;
-            Object.keys(totalCount).forEach(function (key) {
-                if (totalCount[key].visible) {
-                    count += totalCount[key].count;
-                }
-            });
-            let text = count;
-            let textX = Math.round((width - ctx.measureText(text).width) / 2);
-            let textY = height / 1.75;
-
-            ctx.fillText(text, textX, textY);
-
-            text = 'Unresolved Issues';
-            ctx.font = "1em Verdana";
-            textX = 0;
-            textY = height - 15;
-            ctx.fillText(text, textX, textY);
-        }
-    });
-
-    let ctxOpenIssues = document.getElementById("canvas-open-issues").getContext("2d");
+    let canvasOpenIssues = document.getElementById("canvas-open-issues");
+    let ctxOpenIssues = canvasOpenIssues.getContext("2d");
     ctxOpenIssues.height = 200;
-
     let openIssuesDoughnutChart = new Chart(ctxOpenIssues, {
         type: 'doughnut',
         data: issueData,
@@ -145,7 +156,7 @@ Template.projectStats.onRendered(function onRendered() {
                     totalCount[legendItem.text].visible = legendItem.hidden;
                 },
                 fullWidth: true,
-                position: 'top',
+                position: 'bottom',
                 labels: {
                     boxWidth: 13,
                     fontSize: 13,
@@ -212,7 +223,24 @@ Template.projectStats.onRendered(function onRendered() {
     });
 });
 
+Template.projectStats.onDestroyed(function onDestroyed() {
+});
+
 Template.projectStats.helpers({
+    issuesFiledThisWeek() {
+        var start = moment().startOf('isoweek').format('YYYY-MM-DD HH:mm');
+        var end = moment().endOf('isoweek').format('YYYY-MM-DD HH:mm');
+        return (Issues.find({'createdAt': {$lt: end, $gt: start}}).count());
+    },
+    overdueIssues() {
+        var today = moment().startOf('day').format('YYYY-MM-DD');
+        return (Issues.find({'dueDate': {$lt: today}, 'state': {$ne: 'Closed'}}).count());
+    },
+    dueThisWeek() {
+        var start = moment().format('YYYY-MM-DD HH:mm');
+        var end = moment().endOf('isoweek').format('YYYY-MM-DD HH:mm');
+        return (Issues.find({'dueDate': {$lte: end, $gte: start}}).count());
+    },
 });
 
 Template.projectStats.events({
