@@ -19,15 +19,17 @@ const trackerList = ['Defect', 'Change Request', 'Enhancement', 'Question'];
 const priorityList = ['Very Low', 'Low', 'Mid', 'High', 'Very High' ];
 const severityList = ['Cosmetic', 'Minor', 'Moderate', 'Major', 'Critical'];
 
-function activity() {
-    console.log('This is an activity!');
+function updateHistory() {
+    console.log('==========> updateHistory()');
     let projects = Projects.find().fetch();
     projects.forEach(parseProject);
 }
 
 var cron = new Meteor.Cron({
     events:{
-        "0 * * * *"  : activity,
+        "18 16 * * *"  : updateHistory,
+        "19 16 * * *"  : updateHistory,
+        "20 16 * * *"  : updateHistory,
     }
 });
 

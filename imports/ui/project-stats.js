@@ -22,13 +22,14 @@ const lineChartOptions = {
 };
 
 let ctxIssueStats;
-let issueStatsLineChart;
+let issueStatsLineChart = null;
 let stateDataset;
 let trackerDataset;
 let priorityDataset;
 let severityDataset;
 let totalCount;
 let totalCountInitialized = false;
+
 function convertRgb2Rgba(color, alpha) {
     let r = color[1] + color[2];
     let g = color[3] + color[4];
@@ -97,6 +98,11 @@ Template.projectStats.onCreated(function onCreated() {
     priorityDataset = {labels: [], datasets: []};
     severityDataset = {labels: [], datasets: []};
     totalCount = {};
+
+    if (issueStatsLineChart != null) {
+        issueStatsLineChart.destroy();
+        issueStatsLineChart = null;
+    }
 });
 
 Template.projectStats.onRendered(function onRendered() {
@@ -209,7 +215,7 @@ Template.projectStats.onRendered(function onRendered() {
     ctxIssueStats = document.getElementById("canvas-issue-stats").getContext("2d");
     issueStatsLineChart = new Chart(ctxIssueStats, {
         type: 'line',
-        data: priorityDataset,
+        data: stateDataset,
         options: {
             legend: {
                 fullWidth: true,
@@ -257,6 +263,11 @@ Template.projectStats.events({
     'change [id=select-graph]'(event, template) {
         let selection = $('#select-graph option:selected').text();
         let datasetToPlot;
+
+        if (issueStatsLineChart != null) {
+            issueStatsLineChart.destroy();
+            issueStatsLineChart = null;
+        }
 
         if (selection.indexOf('Trackers') >= 0) {
             datasetToPlot = trackerDataset;

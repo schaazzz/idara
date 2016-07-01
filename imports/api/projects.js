@@ -26,6 +26,8 @@ if (Meteor.isServer) {
                     createdAt: new Date(),
                     createdBy: Meteor.user().username
                 });
+
+                Meteor.call('history.insert', name, 0, 0, 0, 0);
             } else {
                 throw new Meteor.Error('not-authorized');
             }
