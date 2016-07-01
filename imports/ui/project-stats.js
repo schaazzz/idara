@@ -21,13 +21,14 @@ const lineChartOptions = {
     pointHitRadius: 10,
 };
 
+let ctxIssueStats;
+let issueStatsLineChart;
 let stateDataset;
 let trackerDataset;
 let priorityDataset;
 let severityDataset;
 let totalCount;
 let totalCountInitialized = false;
-
 function convertRgb2Rgba(color, alpha) {
     let r = color[1] + color[2];
     let g = color[3] + color[4];
@@ -205,8 +206,8 @@ Template.projectStats.onRendered(function onRendered() {
         });
     });
 
-    let ctxIssueStats = document.getElementById("canvas-issue-stats").getContext("2d");
-    let issueStatsLineChart = new Chart(ctxIssueStats, {
+    ctxIssueStats = document.getElementById("canvas-issue-stats").getContext("2d");
+    issueStatsLineChart = new Chart(ctxIssueStats, {
         type: 'line',
         data: priorityDataset,
         options: {
@@ -241,7 +242,47 @@ Template.projectStats.helpers({
         var end = moment().endOf('isoweek').format('YYYY-MM-DD HH:mm');
         return (Issues.find({'dueDate': {$lte: end, $gte: start}}).count());
     },
+    graphs() {
+        var options = [
+            'Issue Filtered by States',
+            'Issues Filtered by Trackers',
+            'Issues Filtered by Priority',
+            'Issues Filtered by Severity'];
+
+        return options;
+    }
 });
 
 Template.projectStats.events({
+    'change [id=select-graph]'(event, template) {
+        let selection = $('#select-graph option:selected').text();
+        let datasetToPlot;
+
+        if (selection.indexOf('Trackers') >= 0) {
+            datasetToPlot = trackerDataset;
+        } else if (selection.indexOf('States') >= 0) {
+            datasetToPlot = stateDataset;
+        } else if (selection.indexOf('Priority') >= 0) {
+            datasetToPlot = priorityDataset;
+        } else if (selection.indexOf('Severity') >= 0) {
+            datasetToPlot = severityDataset;
+        }
+
+        ctxIssueStats = document.getElementById("canvas-issue-stats").getContext("2d");
+        issueStatsLineChart = new Chart(ctxIssueStats, {
+            type: 'line',
+            data: datasetToPlot,
+            options: {
+                legend: {
+                    fullWidth: true,
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 13,
+                        fontSize: 13,
+                        padding: 7,
+                    }
+                }
+            }
+        });
+    },
 });
