@@ -2,11 +2,16 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Projects } from '../api/projects';
 import { Issues } from '../api/issues';
+import '../api/helpers';
 import './search-results.html';
 
 Template.searchResults.helpers({
     searchResults() {
         return Issues.find({title: {$regex: searchTerm.get()}});
+    },
+    customFieldsRows() {
+        console.log(activeProject.get());
+        parseCustomFieldRows(activeProject.get());
     }
 });
 
@@ -23,5 +28,8 @@ Template.searchResults.events({
     'click [name=open-project-page]'(event, template) {
         activeProject.set(event.target.id);
         target.set('projectPage');
+    },
+    'click #btn-add-filter'(event, template) {
+        $('#modal-filter').modal();
     }
 });
