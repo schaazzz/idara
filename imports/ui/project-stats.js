@@ -217,6 +217,11 @@ Template.projectStats.onRendered(function onRendered() {
         type: 'line',
         data: stateDataset,
         options: {
+            title: {
+                display: true,
+                position: 'top',
+                text: '     ',
+            },
             legend: {
                 fullWidth: true,
                 position: 'bottom',
@@ -284,6 +289,11 @@ Template.projectStats.events({
             type: 'line',
             data: datasetToPlot,
             options: {
+                title: {
+                    display: true,
+                    position: 'top',
+                    text: '     ',
+                },
                 legend: {
                     fullWidth: true,
                     position: 'bottom',

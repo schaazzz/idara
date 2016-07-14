@@ -282,11 +282,20 @@ Template.newIssue.events({
         }
 
         var descriptionHtml = outerHTML;
+        var customFields = [];
+
+        for (var i = 0; i < customFieldsRows.length; i++) {
+            customFields.push(customFieldsRows[i].first);
+
+            if (customFieldsRows[i].second) {
+                customFields.push(customFieldsRows[i].second);
+            }
+        }
 
         if (editIssue.get()) {
-            Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows, attachedFilesDict.get('newIssueArray'));
+            Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFields, customFieldsRows, attachedFilesDict.get('newIssueArray'));
         } else {
-            Meteor.call('issues.insert', activeProject.get(), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows, attachedFilesDict.get('newIssueArray'));
+            Meteor.call('issues.insert', activeProject.get(), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFields, customFieldsRows, attachedFilesDict.get('newIssueArray'));
         }
 
         target.set('projectPage');

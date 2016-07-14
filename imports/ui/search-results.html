@@ -57,39 +57,50 @@
 
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-xs-4">
-                            <select id="select-admin" class="form-control" data-toggle="select">
-                                <option value="-1" selected>Select Filter</option>
-                                <option value="Responsible">Responsible</option>
-                                <option value="Assignee">Assignee</option>
-                                <option value="Tracker">Tracker</option>
-                                <option value="Priority">Priority</option>
-                                <option value="Severity">Severity</option>
-                                <option value="Tracker">Tracker</option>
-                                {{#each customFieldsRows}}
-                                    <option value="">custom_{{@index}}</option>
+                        <div class="col-xs-5">
+                            <select id="select-project" class="form-control" data-toggle="select">
+                                <option value="-1" selected>Select Project</option>
+                                {{#each projects}}
+                                    <option value={{name}}>{{name}}</option>
                                 {{/each}}
                             </select>
                         </div>
-                        <!-- <div class="col-xs-4">
-                            <select id="select-admin" class="form-control" data-toggle="select">
-                                <option value="-1" selected>Select project admin</option>
-                                {{#each user in users}}
-                                <option value="{{user.username}}">{{user.username}}</option>
-                                {{/each}}
-                            </select>
-                        </div>
-                        <div class="col-xs-4">
-                            <select id="select-admin" class="form-control" data-toggle="select">
-                                <option value="-1" selected>Select project admin</option>
-                                {{#each user in users}}
-                                <option value="{{user.username}}">{{user.username}}</option>
-                                {{/each}}
-                            </select>
-                        </div> -->
+                    </div>
+                    <div class="row" style="padding-top: 10px;">
+                        {{#if isProjectSelected}}
+                            <div class="col-xs-4">
+                                <select id="select-filter" class="form-control" data-toggle="select">
+                                    <option value="-1" selected>Select Filter</option>
+                                    <option value="Responsible">Responsible</option>
+                                    <option value="Assignee">Assignee</option>
+                                    <option value="Tracker">Tracker</option>
+                                    <option value="Priority">Priority</option>
+                                    <option value="Severity">Severity</option>
+                                    <option value="Tracker">Tracker</option>
+                                    {{#each customFieldsRows}}
+                                        <option value=custom_{{@index}}>{{title}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        {{/if}}
+                        {{#if isFilterSelected}}
+                            <div class="col-xs-3">
+                                <select id="select-admin" class="form-control" data-toggle="select">
+                                    <option value="is-not-equal" selected>is not</option>
+                                    <option value="is-equal" selected>is</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-5">
+                                <select id="select-option" class="form-control" data-toggle="select">
+                                    <option value="-1" selected> </option>
+                                    {{#each option in options.array}}
+                                        <option value="{{option}}">{{option}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        {{/if}}
                     </div>
                 </div>
-
 
                 <div class="modal-footer">
                 </div>

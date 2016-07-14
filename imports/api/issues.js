@@ -7,7 +7,7 @@ export const Issues = new Mongo.Collection('issues');
 
 if (Meteor.isServer) {
     Meteor.methods({
-        'issues.insert'(project, title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows, attachedFiles) {
+        'issues.insert'(project, title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFields, customFieldsRows, attachedFiles) {
             check(project, String);
             check(title, String);
             check(descriptionHtml, String);
@@ -62,12 +62,13 @@ if (Meteor.isServer) {
                     dueDate: dueDate,
                     history: history,
                     participants: participants,
+                    customFields: customFields,
                     customFieldsRows: customFieldsRows,
                     attachedFiles: attachedFiles,
                 });
             }
         },
-        'issues.update'(project, issue, title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFieldsRows, attachedFiles) {
+        'issues.update'(project, issue, title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFields, customFieldsRows, attachedFiles) {
             check(project, String);
             check(issue, Number);
             check(title, String);
@@ -101,6 +102,7 @@ if (Meteor.isServer) {
                     responsible: responsible,
                     dueDate: dueDate,
                     history: thisIssue.history,
+                    customFields: customFields,
                     customFieldsRows: customFieldsRows,
                     attachedFiles: attachedFiles,
                 }

@@ -1,11 +1,10 @@
 import { Projects } from './projects';
 
 parseCustomFieldRows = function (projectName) {
-    console.log(projectName);
     var customFields = Projects.findOne({'name': projectName}).customFields;
-    console.log(customFields);
+    var customFieldsRowsArray = [];
+
     if (customFields) {
-        var customFieldsRowsArray = [];
 
         if ((Object.keys(customFields).length % 2) != 0) {
             customFields.aligner = void 0;
@@ -40,7 +39,7 @@ parseCustomFieldRows = function (projectName) {
 
             customFieldsRowsArray.push(obj);
         }
-
-        console.log('-->', customFieldsRowsArray);
     }
+
+    return (customFieldsRowsArray);
 }

@@ -71,12 +71,12 @@ Template.body.events({
         searchTerm.set($('#input-search-issue').val());
         target.set('searchResults');
     },
-    'click [id=btn-cpanel]'(event, template) {
+    'click #btn-cpanel'(event, template) {
         if (Meteor.user().profile.isRoot) {
             target.set('controlPanel');
         }
     },
-    'click [id=btn-logout]'(event, template) {
+    'click #btn-logout'(event, template) {
         Meteor.logout(function (error) {
             loggedIn.set(false);
         });

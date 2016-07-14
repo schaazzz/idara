@@ -26,7 +26,7 @@ function updateHistory() {
 }
 
 var cron = new Meteor.Cron({
-    events:{
+    events: {
         "00 00 * * *"  : updateHistory,
         "00 06 * * *"  : updateHistory,
         "00 12 * * *"  : updateHistory,

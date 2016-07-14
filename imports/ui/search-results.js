@@ -5,13 +5,60 @@ import { Issues } from '../api/issues';
 import '../api/helpers';
 import './search-results.html';
 
+let projectSelected = new ReactiveVar(false);
+let filterSelected = new ReactiveVar(false);
+let activeFilter = new ReactiveVar();
+let optionsChanged = new ReactiveVar(false);
+let options = [];
+let customFields = [];
+
+Template.searchResults.onRendered(function onRendered() {
+    if (activeProject.get()) {
+        $('#select-project').val(activeProject.get());
+        projectSelected.set(true);
+    } else {
+        projectSelected.set(false);
+    }
+});
+
 Template.searchResults.helpers({
+    isProjectSelected() {
+        return projectSelected.get();
+    },
+    isFilterSelected() {
+            return filterSelected.get();
+    },
+    projects() {
+        return Projects.find({});
+    },
+    options() {
+        let result = {optionsChanged: optionsChanged.get(), array: options};
+        optionsChanged.set(false);
+
+        return (result);
+    },
     searchResults() {
-        return Issues.find({title: {$regex: searchTerm.get()}});
+        /*
+        Notes:
+
+        Searching customFields:
+
+            * db.issues.findOne({'customFields': {$elemMatch: {'title': 'Target Release', 'value': '2.0.0-alpha'}}})
+        */
+
+
+        let results;
+        if (projectSelected.get()) {
+            results = Issues.find({project: activeProject.get(), title: {$regex: searchTerm.get()}});
+        } else {
+            results = Issues.find({title: {$regex: searchTerm.get()}});
+        }
+
+        return (results);
     },
     customFieldsRows() {
-        console.log(activeProject.get());
-        parseCustomFieldRows(activeProject.get());
+        customFields = parseCustomFieldRows(activeProject.get());
+        return (customFields);
     }
 });
 
@@ -31,5 +78,53 @@ Template.searchResults.events({
     },
     'click #btn-add-filter'(event, template) {
         $('#modal-filter').modal();
+    },
+    'change #select-project'(event, template) {
+        let selection = $('#select-project option:selected').text();
+
+        if (selection != '-1') {
+            projectSelected.set(true);
+            activeProject.set(selection);
+        } else {
+            projectSelected.set(false);
+            activeProject.set(void 0);
+        }
+    },
+    'change #select-filter'(event, template) {
+        let selectionTxt = $('#select-filter option:selected').text();
+        let selectionVal = $('#select-filter option:selected').val();
+        let users = Meteor.users.find({}).fetch();
+
+        if (selectionVal == '-1') {
+            options = [];
+            optionsChanged.set(true);
+            filterSelected.set(false);
+            activeFilter.set(void 0);
+        } else {
+            optionsChanged.set(true);
+            filterSelected.set(true);
+            activeFilter.set(selectionVal);
+
+            if ((selectionTxt =='Responsible') || (selectionTxt == 'Assignee')) {
+                options = [];
+                for (var i = 0; i < users.length; i++) {
+                    options.push(users[i].username);
+                }
+            } else if (selectionTxt == 'Tracker') {
+                options = ['Defect', 'Change Request', 'Enhancement', 'Question'];
+            } else if (selectionTxt == 'Priority') {
+                options = ['Very Low', 'Low', 'Mid', 'High', 'Very High' ];
+            } else if (selectionTxt == 'Severity') {
+                options = ['Cosmetic', 'Minor', 'Moderate', 'Major', 'Critical'];
+            } else {
+                if (selectionVal.indexOf('custom') != -1) {
+                    for (var i = 0; i < customFields.length; i++) {
+                        if (customFields[i].title == selectionTxt) {
+                            options = customFields[i].options;
+                        }
+                    }
+                }
+            }
+        }
     }
 });
