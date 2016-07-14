@@ -76,7 +76,6 @@
                                     <option value="Tracker">Tracker</option>
                                     <option value="Priority">Priority</option>
                                     <option value="Severity">Severity</option>
-                                    <option value="Tracker">Tracker</option>
                                     {{#each customFieldsRows}}
                                         <option value=custom_{{@index}}>{{title}}</option>
                                     {{/each}}
@@ -85,7 +84,7 @@
                         {{/if}}
                         {{#if isFilterSelected}}
                             <div class="col-xs-3">
-                                <select id="select-admin" class="form-control" data-toggle="select">
+                                <select id="select-equality" class="form-control" data-toggle="select">
                                     <option value="is-not-equal" selected>is not</option>
                                     <option value="is-equal" selected>is</option>
                                 </select>

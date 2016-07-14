@@ -9,6 +9,8 @@ let projectSelected = new ReactiveVar(false);
 let filterSelected = new ReactiveVar(false);
 let activeFilter = new ReactiveVar();
 let optionsChanged = new ReactiveVar(false);
+
+let searchFilter = {};
 let options = [];
 let customFields = [];
 
@@ -40,13 +42,9 @@ Template.searchResults.helpers({
     searchResults() {
         /*
         Notes:
-
-        Searching customFields:
-
-            * db.issues.findOne({'customFields': {$elemMatch: {'title': 'Target Release', 'value': '2.0.0-alpha'}}})
+        * Searching customFields:
+        *   - db.issues.findOne({'customFields': {$elemMatch: {'title': 'Target Release', 'value': '2.0.0-alpha'}}})
         */
-
-
         let results;
         if (projectSelected.get()) {
             results = Issues.find({project: activeProject.get(), title: {$regex: searchTerm.get()}});
@@ -103,7 +101,7 @@ Template.searchResults.events({
         } else {
             optionsChanged.set(true);
             filterSelected.set(true);
-            activeFilter.set(selectionVal);
+            activeFilter.set({value: selectionVal, text: selectionTxt});
 
             if ((selectionTxt =='Responsible') || (selectionTxt == 'Assignee')) {
                 options = [];
@@ -126,5 +124,37 @@ Template.searchResults.events({
                 }
             }
         }
+    },
+    'change #select-option'(event, template) {
+        let selectedOption = $('#select-option option:selected').text();
+        let checkEquality = $('#select-equality option:selected').text() == 'is'? true : false;
+        let activeFilterCopy = activeFilter.get();
+        let activeFilterKey = '';
+        let customFieldFilter = false;
+
+        if (activeFilterCopy.text == 'Responsible') {
+            activeFilterKey = 'responsible';
+        } else if (activeFilterCopy.text == 'Tracker') {
+            activeFilterKey = 'tracker';
+        } else if (activeFilterCopy.text == 'Priority') {
+            activeFilterKey = 'priority';
+        } else if (activeFilterCopy.text == 'Severity') {
+            activeFilterKey = 'severity';
+        } else {
+            if (activeFilterCopy.value.indexOf('custom') != -1) {
+                customFieldFilter = true;
+                console.log(activeFilterCopy.text);
+                console.log(selectedOption);
+            }
+        }
+
+        if (!customFieldFilter) {
+            searchFilter[activeFilterKey] = checkEquality? selectedOption : {$ne: selectedOption};
+        } else {
+            let valueFilter = checkEquality? {value: selectedOption} : {value: {$ne: selectedOption}};
+            searchFilter['customFields'] = {$elemMatch: {'title': activeFilterCopy.text, 'value': valueFilter.value}};
+        }
+
+        console.log(searchFilter);
     }
 });
