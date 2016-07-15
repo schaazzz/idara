@@ -152,7 +152,16 @@ Template.searchResults.events({
             searchFilter[activeFilterKey] = checkEquality? selectedOption : {$ne: selectedOption};
         } else {
             let valueFilter = checkEquality? {value: selectedOption} : {value: {$ne: selectedOption}};
-            searchFilter['customFields'] = {$elemMatch: {'title': activeFilterCopy.text, 'value': valueFilter.value}};
+
+            if (!searchFilter['$and']) {
+                searchFilter['$and'] = [];
+            }
+
+            searchFilter['$and'].push({
+                'customFields': {
+                    $elemMatch: {'title': activeFilterCopy.text, 'value': valueFilter.value}
+                }
+            });
         }
 
         console.log(searchFilter);
