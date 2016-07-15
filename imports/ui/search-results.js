@@ -9,10 +9,28 @@ let projectSelected = new ReactiveVar(false);
 let filterSelected = new ReactiveVar(false);
 let activeFilter = new ReactiveVar();
 let optionsChanged = new ReactiveVar(false);
-
+let searchTxt = new ReactiveVar('');
 let searchFilter = {};
 let options = [];
 let customFields = [];
+
+function updateSearchTxt() {
+    let filterTxt = {};
+
+    if (searchFilter.project) {
+        filterTxt['project'] = 'Project is ' + searchFilter.project;
+    }
+
+    if (searchFilter.priority) {
+        if (searchFilter.priority.$ne) {
+            filterTxt['priority'] = 'Priority is not ' + searchFilter.priority.$ne;
+        } else {
+            filterTxt['priority'] = 'Priority is ' + searchFilter.priority;
+        }
+    }
+
+    console.log(filterTxt);
+}
 
 Template.searchResults.onRendered(function onRendered() {
     if (activeProject.get()) {
@@ -70,6 +88,12 @@ Template.searchResults.events({
         target.set('projectPage');
     },
     'click #btn-add-filter'(event, template) {
+        searchFilter = {};
+        if (projectSelected) {
+            searchFilter = {'project': activeProject.get()}
+            updateSearchTxt();
+        }
+
         $('#modal-filter').modal();
     },
     'change #select-project'(event, template) {
@@ -78,6 +102,8 @@ Template.searchResults.events({
         if (selection != '-1') {
             projectSelected.set(true);
             activeProject.set(selection);
+            searchFilter = {'project': activeProject.get()};
+            updateSearchTxt();
         } else {
             projectSelected.set(false);
             activeProject.set(void 0);
@@ -159,6 +185,7 @@ Template.searchResults.events({
             });
         }
 
+        updateSearchTxt();
         console.log(searchFilter);
     }
 });
