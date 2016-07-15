@@ -40,11 +40,6 @@ Template.searchResults.helpers({
         return (result);
     },
     searchResults() {
-        /*
-        Notes:
-        * Searching customFields:
-        *   - db.issues.findOne({'customFields': {$elemMatch: {'title': 'Target Release', 'value': '2.0.0-alpha'}}})
-        */
         let results;
         if (projectSelected.get()) {
             results = Issues.find({project: activeProject.get(), title: {$regex: searchTerm.get()}});
