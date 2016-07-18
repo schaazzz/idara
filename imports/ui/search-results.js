@@ -9,30 +9,78 @@ let projectSelected = new ReactiveVar(false);
 let filterSelected = new ReactiveVar(false);
 let activeFilter = new ReactiveVar();
 let optionsChanged = new ReactiveVar(false);
-let searchTxt = new ReactiveVar('');
-let searchFilter = {};
+let searchQueryTxt = new ReactiveVar('');
+let searchQueryCollection = new ReactiveVar();
+let searchQuery = {};
 let options = [];
 let customFields = [];
 
 function updateSearchTxt() {
-    let filterTxt = {};
+    let queryTxt = {};
 
-    if (searchFilter.project) {
-        filterTxt['project'] = 'Project is ' + searchFilter.project;
+    if (searchQuery.project) {
+        queryTxt['project'] = 'Project is ' + searchQuery.project;
     }
 
-    if (searchFilter.priority) {
-        if (searchFilter.priority.$ne) {
-            filterTxt['priority'] = 'Priority is not ' + searchFilter.priority.$ne;
+    if (searchQuery.responsible) {
+        if (searchQuery.responsible.$ne) {
+            queryTxt['responsible'] = 'Responsible is not ' + searchQuery.responsible.$ne;
         } else {
-            filterTxt['priority'] = 'Priority is ' + searchFilter.priority;
+            queryTxt['responsible'] = 'Responsible is ' + searchQuery.responsible;
         }
     }
 
-    console.log(filterTxt);
+    if (searchQuery.tracker) {
+        if (searchQuery.tracker.$ne) {
+            queryTxt['tracker'] = 'Tracker is not ' + searchQuery.tracker.$ne;
+        } else {
+            queryTxt['tracker'] = 'Tracker is ' + searchQuery.tracker;
+        }
+    }
+
+    if (searchQuery.priority) {
+        if (searchQuery.priority.$ne) {
+            queryTxt['priority'] = 'Priority is not ' + searchQuery.priority.$ne;
+        } else {
+            queryTxt['priority'] = 'Priority is ' + searchQuery.priority;
+        }
+    }
+
+    if (searchQuery.severity) {
+        if (searchQuery.severity.$ne) {
+            queryTxt['severity'] = 'Severity is not ' + searchQuery.severity.$ne;
+        } else {
+            queryTxt['severity'] = 'Severity is ' + searchQuery.severity;
+        }
+    }
+
+    if (searchQuery.priority) {
+        if (searchQuery.priority.$ne) {
+            queryTxt['priority'] = 'Priority is not ' + searchQuery.priority.$ne;
+        } else {
+            queryTxt['priority'] = 'Priority is ' + searchQuery.priority;
+        }
+    }
+
+    if (searchQuery.$and) {
+        for (var i = 0; i < searchQuery.$and.length; i++) {
+            if (searchQuery.$and[i].customFields.$elemMatch.value.$ne) {
+                queryTxt[searchQuery.$and[i].customFields.$elemMatch.title] =
+                    searchQuery.$and[i].customFields.$elemMatch.title + ' is not ' + searchQuery.$and[i].customFields.$elemMatch.value.$ne;
+            } else {
+                queryTxt[searchQuery.$and[i].customFields.$elemMatch.title] =
+                    searchQuery.$and[i].customFields.$elemMatch.title + ' is ' + searchQuery.$and[i].customFields.$elemMatch.value;
+            }
+        }
+    }
+
+    searchQueryTxt.set(queryTxt);
+    console.log(queryTxt);
 }
 
 Template.searchResults.onRendered(function onRendered() {
+    searchQueryCollection.set({count: 0});
+
     if (activeProject.get()) {
         $('#select-project').val(activeProject.get());
         projectSelected.set(true);
@@ -67,6 +115,14 @@ Template.searchResults.helpers({
 
         return (results);
     },
+    searchQueries() {
+        let searchQueryArray = [];
+
+        Object.keys(searchQueryTxt.get()).forEach(function (key) {
+            searchQueryArray.push(searchQueryTxt.get()[key]);
+        });
+        return (searchQueryArray);
+    },
     customFieldsRows() {
         customFields = parseCustomFieldRows(activeProject.get());
         return (customFields);
@@ -88,9 +144,9 @@ Template.searchResults.events({
         target.set('projectPage');
     },
     'click #btn-add-filter'(event, template) {
-        searchFilter = {};
+        searchQuery = {};
         if (projectSelected) {
-            searchFilter = {'project': activeProject.get()}
+            searchQuery = {'project': activeProject.get()}
             updateSearchTxt();
         }
 
@@ -102,7 +158,7 @@ Template.searchResults.events({
         if (selection != '-1') {
             projectSelected.set(true);
             activeProject.set(selection);
-            searchFilter = {'project': activeProject.get()};
+            searchQuery = {'project': activeProject.get()};
             updateSearchTxt();
         } else {
             projectSelected.set(false);
@@ -146,7 +202,7 @@ Template.searchResults.events({
             }
         }
     },
-    'change #select-option'(event, template) {
+    'click #btn-add-partial-query'(event, template) {
         let selectedOption = $('#select-option option:selected').text();
         let checkEquality = $('#select-equality option:selected').text() == 'is'? true : false;
         let activeFilterCopy = activeFilter.get();
@@ -164,21 +220,26 @@ Template.searchResults.events({
         } else {
             if (activeFilterCopy.value.indexOf('custom') != -1) {
                 customFieldFilter = true;
-                console.log(activeFilterCopy.text);
-                console.log(selectedOption);
             }
         }
 
         if (!customFieldFilter) {
-            searchFilter[activeFilterKey] = checkEquality? selectedOption : {$ne: selectedOption};
+            searchQuery[activeFilterKey] = checkEquality? selectedOption : {$ne: selectedOption};
         } else {
             let valueFilter = checkEquality? {value: selectedOption} : {value: {$ne: selectedOption}};
 
-            if (!searchFilter['$and']) {
-                searchFilter['$and'] = [];
+            if (!searchQuery.$and) {
+                searchQuery['$and'] = [];
+            } else {
+                for (var i = 0; i < searchQuery.$and.length; i++) {
+                    if (searchQuery.$and[i].customFields.$elemMatch.title == activeFilterCopy.text) {
+                        searchQuery.$and.splice(i, 1);
+                        break;
+                    }
+                }
             }
 
-            searchFilter['$and'].push({
+            searchQuery['$and'].push({
                 'customFields': {
                     $elemMatch: {'title': activeFilterCopy.text, 'value': valueFilter.value}
                 }
@@ -186,6 +247,5 @@ Template.searchResults.events({
         }
 
         updateSearchTxt();
-        console.log(searchFilter);
     }
 });

@@ -10,12 +10,19 @@
         </div>
     </div>
 
+    <hr style="margin-top: 5px;">
+
     <div class="row" style="font-size: 80%;">
         <div class="col-xs-12">
+            {{#with searchQueries}}
+                {{#each element in searchQueries}}
+                    <small>{{element}},&nbsp;</small>
+                {{/each}}
+                <hr style="margin-top: 5px;">
+            {{/with}}
         </div>
     </div>
 
-    <hr style="margin-top: 5px;">
     <div class="row" style="padding-top: 10px;">
         <div class="col-xs-12">
             <table class="table table-responsive table-striped table-hover">
@@ -65,6 +72,13 @@
                                 {{/each}}
                             </select>
                         </div>
+                        <div class="col-xs-2">
+                            {{#if isFilterSelected}}
+                                <button class="btn btn-primary" id="btn-add-partial-query">
+                                    <i class="glyphicon glyphicon-plus"></i>
+                                </button>
+                            {{/if}}
+                        </div>
                     </div>
                     <div class="row" style="padding-top: 10px;">
                         {{#if isProjectSelected}}
@@ -72,7 +86,7 @@
                                 <select id="select-filter" class="form-control" data-toggle="select">
                                     <option value="-1" selected>Select Filter</option>
                                     <option value="Responsible">Responsible</option>
-                                    <option value="Assignee">Assignee</option>
+                                    <!-- <option value="Assignee">Assignee</option> -->
                                     <option value="Tracker">Tracker</option>
                                     <option value="Priority">Priority</option>
                                     <option value="Severity">Severity</option>
@@ -102,6 +116,20 @@
                 </div>
 
                 <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-xs-8">
+                        </div>
+                        <div class="col-xs-2">
+                            <button class="btn btn-primary pull-right" id="btn-add-filter">
+                                Add&nbsp;
+                            </button>
+                        </div>
+                        <div class="col-xs-2">
+                            <button class="btn btn-danger pull-right" id="btn-cancel-filter">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
