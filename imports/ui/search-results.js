@@ -9,77 +9,75 @@ let projectSelected = new ReactiveVar(false);
 let filterSelected = new ReactiveVar(false);
 let activeFilter = new ReactiveVar();
 let optionsChanged = new ReactiveVar(false);
-let searchQueryTxt = new ReactiveVar('');
 let searchQueryCollection = new ReactiveVar();
 let searchQuery = {};
 let options = [];
 let customFields = [];
 
-function updateSearchTxt() {
+function createSearchTxt(query) {
     let queryTxt = {};
 
-    if (searchQuery.project) {
-        queryTxt['project'] = 'Project is ' + searchQuery.project;
+    if (query.project) {
+        queryTxt['project'] = 'Project is ' + query.project;
     }
 
-    if (searchQuery.responsible) {
-        if (searchQuery.responsible.$ne) {
-            queryTxt['responsible'] = 'Responsible is not ' + searchQuery.responsible.$ne;
+    if (query.responsible) {
+        if (query.responsible.$ne) {
+            queryTxt['responsible'] = 'Responsible is not ' + query.responsible.$ne;
         } else {
-            queryTxt['responsible'] = 'Responsible is ' + searchQuery.responsible;
+            queryTxt['responsible'] = 'Responsible is ' + query.responsible;
         }
     }
 
-    if (searchQuery.tracker) {
-        if (searchQuery.tracker.$ne) {
-            queryTxt['tracker'] = 'Tracker is not ' + searchQuery.tracker.$ne;
+    if (query.tracker) {
+        if (query.tracker.$ne) {
+            queryTxt['tracker'] = 'Tracker is not ' + query.tracker.$ne;
         } else {
-            queryTxt['tracker'] = 'Tracker is ' + searchQuery.tracker;
+            queryTxt['tracker'] = 'Tracker is ' + query.tracker;
         }
     }
 
-    if (searchQuery.priority) {
-        if (searchQuery.priority.$ne) {
-            queryTxt['priority'] = 'Priority is not ' + searchQuery.priority.$ne;
+    if (query.priority) {
+        if (query.priority.$ne) {
+            queryTxt['priority'] = 'Priority is not ' + query.priority.$ne;
         } else {
-            queryTxt['priority'] = 'Priority is ' + searchQuery.priority;
+            queryTxt['priority'] = 'Priority is ' + query.priority;
         }
     }
 
-    if (searchQuery.severity) {
-        if (searchQuery.severity.$ne) {
-            queryTxt['severity'] = 'Severity is not ' + searchQuery.severity.$ne;
+    if (query.severity) {
+        if (query.severity.$ne) {
+            queryTxt['severity'] = 'Severity is not ' + query.severity.$ne;
         } else {
-            queryTxt['severity'] = 'Severity is ' + searchQuery.severity;
+            queryTxt['severity'] = 'Severity is ' + query.severity;
         }
     }
 
-    if (searchQuery.priority) {
-        if (searchQuery.priority.$ne) {
-            queryTxt['priority'] = 'Priority is not ' + searchQuery.priority.$ne;
+    if (query.priority) {
+        if (query.priority.$ne) {
+            queryTxt['priority'] = 'Priority is not ' + query.priority.$ne;
         } else {
-            queryTxt['priority'] = 'Priority is ' + searchQuery.priority;
+            queryTxt['priority'] = 'Priority is ' + query.priority;
         }
     }
 
-    if (searchQuery.$and) {
-        for (var i = 0; i < searchQuery.$and.length; i++) {
-            if (searchQuery.$and[i].customFields.$elemMatch.value.$ne) {
-                queryTxt[searchQuery.$and[i].customFields.$elemMatch.title] =
-                    searchQuery.$and[i].customFields.$elemMatch.title + ' is not ' + searchQuery.$and[i].customFields.$elemMatch.value.$ne;
+    if (query.$and) {
+        for (var i = 0; i < query.$and.length; i++) {
+            if (query.$and[i].customFields.$elemMatch.value.$ne) {
+                queryTxt[query.$and[i].customFields.$elemMatch.title] =
+                    query.$and[i].customFields.$elemMatch.title + ' is not ' + query.$and[i].customFields.$elemMatch.value.$ne;
             } else {
-                queryTxt[searchQuery.$and[i].customFields.$elemMatch.title] =
-                    searchQuery.$and[i].customFields.$elemMatch.title + ' is ' + searchQuery.$and[i].customFields.$elemMatch.value;
+                queryTxt[query.$and[i].customFields.$elemMatch.title] =
+                    query.$and[i].customFields.$elemMatch.title + ' is ' + query.$and[i].customFields.$elemMatch.value;
             }
         }
     }
 
-    searchQueryTxt.set(queryTxt);
-    console.log(queryTxt);
+    return (queryTxt);
 }
 
 Template.searchResults.onRendered(function onRendered() {
-    searchQueryCollection.set({count: 0});
+    searchQueryCollection.set({count: 0, queries: {}});
 
     if (activeProject.get()) {
         $('#select-project').val(activeProject.get());
@@ -116,12 +114,24 @@ Template.searchResults.helpers({
         return (results);
     },
     searchQueries() {
-        let searchQueryArray = [];
+        let singleQueryTxtArray = [];
+        let searchQueryTxtArrays = [];
+        let searchQueries = searchQueryCollection.get();
 
-        Object.keys(searchQueryTxt.get()).forEach(function (key) {
-            searchQueryArray.push(searchQueryTxt.get()[key]);
+        Object.keys(searchQueries.queries).forEach(function (key) {
+            let singleQueryTxt = createSearchTxt(searchQueries.queries[key]);
+            console.log(singleQueryTxt);
+            singleQueryTxtArray = [];
+            Object.keys(singleQueryTxt).forEach(function (key) {
+                singleQueryTxtArray.push(singleQueryTxt[key]);
+            });
+
+            searchQueryTxtArrays.push(singleQueryTxtArray);
         });
-        return (searchQueryArray);
+
+        // let issues = Issues.find(searchQueryCollection.get().queries[0]).fetch();
+        console.log(searchQueryTxtArrays);
+        return (searchQueryTxtArrays);
     },
     customFieldsRows() {
         customFields = parseCustomFieldRows(activeProject.get());
@@ -145,11 +155,14 @@ Template.searchResults.events({
     },
     'click #btn-add-filter'(event, template) {
         searchQuery = {};
+        options = [];
+        filterSelected.set(false);
+        activeFilter.set(void 0);
+        optionsChanged.set(false);
+        $('#select-filter').val(-1);
         if (projectSelected) {
             searchQuery = {'project': activeProject.get()}
-            updateSearchTxt();
         }
-
         $('#modal-filter').modal();
     },
     'change #select-project'(event, template) {
@@ -159,7 +172,6 @@ Template.searchResults.events({
             projectSelected.set(true);
             activeProject.set(selection);
             searchQuery = {'project': activeProject.get()};
-            updateSearchTxt();
         } else {
             projectSelected.set(false);
             activeProject.set(void 0);
@@ -245,7 +257,11 @@ Template.searchResults.events({
                 }
             });
         }
-
-        updateSearchTxt();
+    },
+    'click #btn-add-query'(event, template) {
+        let searchQueries = searchQueryCollection.get();
+        searchQueries.queries[searchQueries.count] = searchQuery;
+        searchQueries.count++;
+        searchQueryCollection.set(searchQueries);
     }
 });
