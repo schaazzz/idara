@@ -9,7 +9,10 @@ let projectSelected = new ReactiveVar(false);
 let filterSelected = new ReactiveVar(false);
 let activeFilter = new ReactiveVar();
 let optionsChanged = new ReactiveVar(false);
+let partialQueryAdded = new ReactiveVar(false);
 let searchQueryCollection = new ReactiveVar();
+let finalQuery = new ReactiveVar();
+let disabledQueries = [];
 let searchQuery = {};
 let options = [];
 let customFields = [];
@@ -78,7 +81,6 @@ function createSearchTxt(query) {
 
 Template.searchResults.onRendered(function onRendered() {
     searchQueryCollection.set({count: 0, queries: {}});
-
     if (activeProject.get()) {
         $('#select-project').val(activeProject.get());
         projectSelected.set(true);
@@ -105,33 +107,56 @@ Template.searchResults.helpers({
     },
     searchResults() {
         let results;
-        if (projectSelected.get()) {
-            results = Issues.find({project: activeProject.get(), title: {$regex: searchTerm.get()}});
+        let finalQueryExpression = finalQuery.get();
+
+        if (!finalQueryExpression) {
+            if (projectSelected.get()) {
+                results = Issues.find({project: activeProject.get(), title: {$regex: searchTerm.get()}});
+            } else {
+                results = Issues.find({title: {$regex: searchTerm.get()}});
+            }
         } else {
-            results = Issues.find({title: {$regex: searchTerm.get()}});
+            results = Issues.find(finalQueryExpression);
         }
 
         return (results);
+    },
+    newQuery() {
+        let partialQueryTxtArray = [];
+        let partialQueryTxt = createSearchTxt(searchQuery);
+
+        if (partialQueryAdded.get()) {
+            partialQueryAdded.set(false);
+        }
+
+        partialQueryTxtArray = [];
+        Object.keys(partialQueryTxt).forEach(function (key) {
+            partialQueryTxtArray.push(partialQueryTxt[key]);
+        });
+
+        return (partialQueryTxtArray);
     },
     searchQueries() {
         let singleQueryTxtArray = [];
         let searchQueryTxtArrays = [];
         let searchQueries = searchQueryCollection.get();
 
-        Object.keys(searchQueries.queries).forEach(function (key) {
-            let singleQueryTxt = createSearchTxt(searchQueries.queries[key]);
-            console.log(singleQueryTxt);
-            singleQueryTxtArray = [];
-            Object.keys(singleQueryTxt).forEach(function (key) {
-                singleQueryTxtArray.push(singleQueryTxt[key]);
+        if (searchQueries) {
+            Object.keys(searchQueries.queries).forEach(function (key) {
+                let singleQueryTxt = createSearchTxt(searchQueries.queries[key]);
+
+                singleQueryTxtArray = [];
+                Object.keys(singleQueryTxt).forEach(function (key) {
+                    singleQueryTxtArray.push(singleQueryTxt[key]);
+                });
+
+                searchQueryTxtArrays.push(singleQueryTxtArray);
             });
 
-            searchQueryTxtArrays.push(singleQueryTxtArray);
-        });
-
-        // let issues = Issues.find(searchQueryCollection.get().queries[0]).fetch();
-        console.log(searchQueryTxtArrays);
-        return (searchQueryTxtArrays);
+            return (searchQueryTxtArrays);
+        } else {
+            return (null);
+        }
     },
     customFieldsRows() {
         customFields = parseCustomFieldRows(activeProject.get());
@@ -149,6 +174,20 @@ Template.searchResults.events({
         activeIssue.set(issue);
         target.set('issuePage');
     },
+    'change [name=chk-toggle-filter]'(event, template) {
+        let id = '#' + event.target.id;
+        let value = event.target.attributes.value.value;
+
+        if (!$(id).is(':checked')) {
+            if (disabledQueries.indexOf(value) < 0) {
+                disabledQueries.push(value);
+            }
+        } else {
+            if (disabledQueries.indexOf(value) >= 0) {
+                disabledQueries.splice(disabledQueries.indexOf(value), 1);
+            }
+        }
+    },
     'click [name=open-project-page]'(event, template) {
         activeProject.set(event.target.id);
         target.set('projectPage');
@@ -160,9 +199,12 @@ Template.searchResults.events({
         activeFilter.set(void 0);
         optionsChanged.set(false);
         $('#select-filter').val(-1);
+
         if (projectSelected) {
             searchQuery = {'project': activeProject.get()}
         }
+
+        partialQueryAdded.set(true);
         $('#modal-filter').modal();
     },
     'change #select-project'(event, template) {
@@ -172,6 +214,7 @@ Template.searchResults.events({
             projectSelected.set(true);
             activeProject.set(selection);
             searchQuery = {'project': activeProject.get()};
+            partialQueryAdded.set(true);
         } else {
             projectSelected.set(false);
             activeProject.set(void 0);
@@ -257,11 +300,33 @@ Template.searchResults.events({
                 }
             });
         }
+
+        partialQueryAdded.set(true);
     },
     'click #btn-add-query'(event, template) {
         let searchQueries = searchQueryCollection.get();
         searchQueries.queries[searchQueries.count] = searchQuery;
         searchQueries.count++;
         searchQueryCollection.set(searchQueries);
+        $('#modal-filter').modal('toggle');
+    },
+    'click #btn-cancel-query'(event, template) {
+        $('#modal-filter').modal('toggle');
+    },
+    'click #btn-run-query'(event, template) {
+        let searchQueries = searchQueryCollection.get().queries;
+        let finalQueryExpression = {$or: []};
+
+        Object.keys(searchQueries).forEach(function (key) {
+            if (disabledQueries.indexOf(key) < 0) {
+                finalQueryExpression.$or.push(searchQueries[key]);
+            }
+        });
+
+        if (finalQueryExpression.$or.length == 0) {
+            finalQueryExpression.$or.push({});
+        }
+
+        finalQuery.set(finalQueryExpression);
     }
 });
