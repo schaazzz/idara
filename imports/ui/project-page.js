@@ -37,6 +37,9 @@ Template.projectPage.helpers({
             result = true;
         }
         return result;
+    },
+    projetHasEpics() {
+        return true;
     }
 });
 

@@ -45,6 +45,10 @@ Template.registerHelper("eq", function(arg0, arg1) {
     return (arg0 == arg1);
 });
 
+Template.registerHelper("and", function(arg0, arg1) {
+    return (arg0 && arg1);
+});
+
 Template.body.helpers({
     showLoginForm() {
         return !loggedIn.get();

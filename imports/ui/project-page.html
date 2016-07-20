@@ -3,13 +3,18 @@
         <div class="col-xs-12">
             <h3 class="page-header">{{project.name}}
                 {{#if editingAllowed}}
-                    <a href="#nolink" id="a-config-project" class="pull-right" style="font-size: 20px">
+                    <a href="#nolink" id="a-config-project" class="pull-right" style="font-size: 20px; margin-left: 5px;">
                         <span class="pull-right glyphicon glyphicon-cog" style="margin-top: 13px;"></span>
                     </a>
                 {{/if}}
-                <a href="#nolink" id="a-project-stats" class="pull-right" style="font-size: 20px; padding-right: 5px;">
+                <a href="#nolink" id="a-project-stats" class="pull-right" style="font-size: 20px; margin-left: 5px;">
                     <span class="pull-right glyphicon glyphicon-stats" style="margin-top: 13px;"></span>
                 </a>
+                {{#if and addingIssuesAllowed projetHasEpics}}
+                <a href="#nolink" id="a-project-board" class="pull-right" style="font-size: 20px; margin-left: 5px;">
+                    <span class="pull-right glyphicon glyphicon-blackboard" style="margin-top: 13px;"></span>
+                </a>
+                {{/if}}
             </h3>
         </div>
     </div>
@@ -33,9 +38,16 @@
         </div>
         <div class="col-xs-6">
             {{#if addingIssuesAllowed}}
-                <a href="#nolink" id="new-issue" class="pull-right" style="font-size: 15px; margin-top: 9px;">
+                <a href="#nolink" id="new-issue" class="pull-right" style="font-size: 15px; margin-top: 9px; margin-left: 15px;">
                     <span class="glyphicon glyphicon-plus"></span>
                     &nbsp;New Issue
+                </a>
+            {{/if}}
+
+            {{#if and addingIssuesAllowed projetHasEpics}}
+                <a href="#nolink" id="new-epic" class="pull-right" style="font-size: 15px; margin-top: 9px;">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    &nbsp;New Epic
                 </a>
             {{/if}}
         </div>
