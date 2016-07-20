@@ -227,13 +227,13 @@ Template.newIssue.events({
     'click #a-delete-file'(event, template) {
         Files.remove({'_id': this._id});
     },
-    'click [id=btn-add-issue]'(event, template) {
+    'click #btn-add-issue'(event, template) {
         var title = template.find('#issue-title').value;
         var tracker = template.find('#select-tracker').value;
         var priority = template.find('#select-priority').value;
+        var responsible = template.find('#select-responsible :selected').text;
         var severity = template.find('#select-severity').value;
         var dueDate = template.find('#due-date').value;
-        var responsible = template.find('#select-responsible :selected').text;
         var description = template.find('#issue-description').value;
         var customFieldsRows = customFieldsRowsGlobal.get();
 
