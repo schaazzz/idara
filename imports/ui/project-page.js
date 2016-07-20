@@ -44,7 +44,11 @@ Template.projectPage.helpers({
 });
 
 Template.projectPage.events({
-    'click [id=new-issue]'(event, template) {
+    'click #new-epic'(event, template) {
+        editEpic.set(false);
+        target.set('newEpic');
+    },
+    'click #new-issue'(event, template) {
         editIssue.set(false);
         target.set('newIssue');
     },
