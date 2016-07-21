@@ -1,0 +1,80 @@
+<template name="epicPage">
+    <div class="well well-lg">
+        <div class="row">
+            <div class="col-xs-9">
+                <h5 style="margin-bottom: 0px;">{{epic.title}}</h5>
+                <small>
+                    Created by
+                    <a href="#nolink" name="a-user-id" id={{issue.createdBy}}>
+                        {{epic.createdBy}}
+                    </a>
+                    at {{epic.createdAt}}
+                </small>
+            </div>
+            <div class="col-xs-3">
+                {{#if not disableIssueControls}}
+                    <a class="pull-right" href="#nolink" id="a-edit-issue">Edit</a>
+                {{/if}}
+            </div>
+        </div>
+        <hr style="margin-top: 5px;">
+
+        <div class="row">
+            <div class="col-xs-2 col-issue-field-name">
+                <b>State:</b>
+            </div>
+            <div class="col-xs-3 col-issue-field">
+                <p class="pull-left p-issue-fields">{{epic.state}}</p>
+            </div>
+            <div class="col-xs-2"></div>
+            <div class="col-xs-2 col-issue-field-name">
+                <b>Start date:</b>
+            </div>
+            <div class="col-xs-3 col-issue-field">
+                <p class="pull-left p-issue-fields">{{epic.startDate}}</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-2 col-issue-field-name">
+                <b>Responsible:</b>
+            </div>
+            <div class="col-xs-3 col-issue-field">
+                <p class="pull-left p-issue-fields">
+                    <a href="#nolink" name="a-user-id" id={{issue.responsible}}>
+                        {{epic.responsible}}
+                    </a>
+                </p>
+            </div>
+            <div class="col-xs-2 col-issue-field-name"></div>
+            <div class="col-xs-2">
+                <b>Priority:</b>
+            </div>
+            <div class="col-xs-3">
+                <p class="pull-left p-issue-fields">{{epic.priority}}</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-2">
+                <b>Number of Issues:</b>
+            </div>
+            <div class="col-xs-3 col-issue-field">
+                <p class="pull-left p-issue-fields">{{epic.numIssues}}</p>
+            </div>
+            <div class="col-xs-2"></div>
+            <div class="col-xs-2">
+                <b>Progress:</b>
+            </div>
+            <div class="col-xs-3">
+                <p class="pull-left p-issue-fields">{{epic.progress}}</p>
+            </div>
+        </div>
+        <hr style="margin-top: 5px;">
+
+        <b>Description</b>
+        <p>
+            {{{epic.descriptionHtml}}}
+        </p>
+    </div>
+</template>

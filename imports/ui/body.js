@@ -12,6 +12,7 @@ import './project-page';
 import './project-stats';
 import './new-epic';
 import './new-issue';
+import './epic-page';
 import './issue-page';
 import './edit-workflow';
 import './search-results';

@@ -45,6 +45,7 @@ if (Meteor.isServer) {
                     history: history,
                     issues: issues,
                     attachedFiles: attachedFiles,
+                    progress: 0
                 });
             }
         },

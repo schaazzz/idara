@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import {Projects} from '../api/projects';
+import {Epics} from '../api/epics';
 import {Issues} from '../api/issues';
 import './project-page.html';
 
@@ -13,6 +14,9 @@ Template.projectPage.onRendered(function onRendered() {
 Template.projectPage.helpers({
     project() {
         return Projects.findOne({'name': activeProject.get()});
+    },
+    epics() {
+        return Epics.find({'project': activeProject.get()});
     },
     issues() {
         return Issues.find({'project': activeProject.get()});
@@ -52,6 +56,10 @@ Template.projectPage.events({
     'click #new-issue'(event, template) {
         editIssue.set(false);
         target.set('newIssue');
+    },
+    'click [name=a-epic-page]'(event, template) {
+        activeEpic.set(event.target.id);
+        target.set('epicPage');
     },
     'click [name=a-issue-page]'(event, template) {
         activeIssue.set(event.target.id);

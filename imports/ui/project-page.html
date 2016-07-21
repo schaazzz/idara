@@ -52,6 +52,48 @@
             {{/if}}
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <strong>Epics</strong>
+        </div>
+    </div>
+    <div class="row" style="padding-top: 10px;">
+        <div class="col-xs-12">
+            <table class="table table-responsive table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Priority</th>
+                        <th>State</th>
+                        <th>Responsible</th>
+                        <th>Progress</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each epic in epics}}
+                        <tr>
+                            <td><a name="a-epic-page" href="#nolink" id="{{epic.number}}">{{epic.number}}</a></td>
+                            <td><a name="a-epic-page" href="#nolink" id="{{epic.number}}">{{epic.title}}</a></td>
+                            <td>{{epic.priority}}</td>
+                            <td>{{epic.state}}</td>
+                            <td><a name="a-user-id" href="#nolink" id="{{epic.responsible}}">{{epic.responsible}}</a></td>
+                            <td>{{epic.progress}} %</td>
+                            <td>{{epic.createdAt}}</td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <strong>Issues</strong>
+        </div>
+    </div>
     <div class="row" style="padding-top: 10px;">
         <div class="col-xs-12">
             <table class="table table-responsive table-striped table-hover">
