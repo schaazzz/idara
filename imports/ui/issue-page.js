@@ -323,7 +323,7 @@ Template.issuePage.helpers({
     },
     issue() {
         var thisIssue = Issues.findOne({'number': parseInt(activeIssue.get())});
-        thisIssue.startDate = moment(new Date()).format('YYYY-MM-DD');
+        thisIssue.createdAt = moment(thisIssue.createdAt).format('YYYY-MM-DD');
         return thisIssue;
     },
     comments() {

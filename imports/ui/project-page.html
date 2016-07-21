@@ -28,37 +28,33 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-6">
-            <select id="select-filter" class="form-control" data-toggle="select" style="width: auto !important; height: auto !important; border: 1px solid #bdc3c7 !important;">
-                <option value="0" selected>All Issues</option>
-                <option value="1">Open Issues</option>
-                <option value="2">Undecided Issues</option>
-                <option value="3">Closed Issues</option>
-            </select>
-        </div>
-        <div class="col-xs-6">
+        <div class="col-xs-2">
             {{#if addingIssuesAllowed}}
-                <a href="#nolink" id="new-issue" class="pull-right" style="font-size: 15px; margin-top: 9px; margin-left: 15px;">
+                <button id="new-issue" class="btn btn-warning">
                     <span class="glyphicon glyphicon-plus"></span>
                     &nbsp;New Issue
-                </a>
+                </button>
             {{/if}}
-
+        </div>
+        <div class="col-xs-2">
             {{#if and addingIssuesAllowed projetHasEpics}}
-                <a href="#nolink" id="new-epic" class="pull-right" style="font-size: 15px; margin-top: 9px;">
+                <button id="new-epic" class="btn btn-danger pull-left">
                     <span class="glyphicon glyphicon-plus"></span>
                     &nbsp;New Epic
-                </a>
+                </button>
             {{/if}}
+        </div>
+        <div class="col-xs-8">
         </div>
     </div>
 
     <div class="row">
         <div class="col-xs-12">
-            <strong>Epics</strong>
+            <h3 class="pull-right">Epics</h3>
         </div>
+        <hr width="25%" align="right" style="border: 1px solid;">
     </div>
-    <div class="row" style="padding-top: 10px;">
+    <div class="row" style="padding-top: 0px;">
         <div class="col-xs-12">
             <table class="table table-responsive table-striped table-hover">
                 <thead>
@@ -89,12 +85,15 @@
         </div>
     </div>
 
+    <hr>
+
     <div class="row">
         <div class="col-xs-12">
-            <strong>Issues</strong>
+            <h3 class="pull-right">Issues</h3>
         </div>
+        <hr width="25%" align="right" style="border: 1px solid;">
     </div>
-    <div class="row" style="padding-top: 10px;">
+    <div class="row" style="padding-top: 0px;">
         <div class="col-xs-12">
             <table class="table table-responsive table-striped table-hover">
                 <thead>

@@ -36,6 +36,12 @@ var cron = new Meteor.Cron({
     }
 });
 
+issueObserer = Issues.find().observe({
+    changed: function(d, i) {
+        console.log('Observer', d, i);
+    }
+});
+
 function parseProject(element, index, array) {
     var workflow = element.workflow;
 

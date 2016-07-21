@@ -293,6 +293,8 @@ Template.newIssue.events({
             }
         }
 
+        console.log('$$$$', customFieldsRows);
+
         if (editIssue.get()) {
             Meteor.call('issues.update', activeProject.get(), parseInt(activeIssue.get()), title, descriptionHtml, descriptionMarkdown, tracker, priority, severity, dueDate, responsible, customFields, customFieldsRows, attachedFilesDict.get('newIssueArray'));
         } else {

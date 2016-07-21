@@ -5,7 +5,7 @@
                 <h5 style="margin-bottom: 0px;">{{epic.title}}</h5>
                 <small>
                     Created by
-                    <a href="#nolink" name="a-user-id" id={{issue.createdBy}}>
+                    <a href="#nolink" name="a-user-id" id={{epic.createdBy}}>
                         {{epic.createdBy}}
                     </a>
                     at {{epic.createdAt}}
@@ -31,7 +31,7 @@
                 <b>Start date:</b>
             </div>
             <div class="col-xs-3 col-issue-field">
-                <p class="pull-left p-issue-fields">{{epic.startDate}}</p>
+                <p class="pull-left p-issue-fields">{{epic.createdAt}}</p>
             </div>
         </div>
 
@@ -67,7 +67,7 @@
                 <b>Progress:</b>
             </div>
             <div class="col-xs-3">
-                <p class="pull-left p-issue-fields">{{epic.progress}}</p>
+                <p class="pull-left p-issue-fields">{{epic.progress}}%</p>
             </div>
         </div>
         <hr style="margin-top: 5px;">
@@ -76,5 +76,95 @@
         <p>
             {{{epic.descriptionHtml}}}
         </p>
+    </div>
+
+    <div class="well well-lg">
+        <div class="row">
+            <div class="col-xs-12">
+                <b>History</b>
+            </div>
+            <div class="col-xs-12">
+                <hr>
+            </div>
+            <div class="col-xs-12">
+                <ul>
+                    {{#each entry in epic.history}}
+                        {{#if eq entry.type "$epicCreated"}}
+                            <li>
+                                <b>[{{entry.date}}]</b>
+                                Epic created by
+                                <a href="#noline" name="a-user-id" id={{entry.actor}}>
+                                    {{entry.actor}}
+                                </a>
+                                and assigned to
+                                <a href="#noling" name="a-user-id" id={{entry.assignee}}>
+                                    {{entry.assignee}}
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{#if eq entry.type "$updateEpic"}}
+                            <li>
+                                <b>[{{entry.date}}]</b>
+                                Epic updated by
+                                <a href="#nolink" name="a-user-id" id={{entry.actor}}>
+                                    {{entry.actor}}
+                                </a>
+                            </li>
+                        {{/if}}
+
+                        {{#if eq entry.type "$changeState"}}
+                            <li>
+                                <b>[{{entry.date}}]</b>
+                                <a href="#nolink" name="a-user-id" id={{entry.actor}}>
+                                    {{entry.actor}}
+                                </a>
+                                changed state:
+                                <span class="text-danger">{{entry.startState}} ➔ {{entry.endState}}</span>
+                                {{#if startStateHasStateChangeComment entry.startState}}
+                                    [<a href="#nolink" class="text-info" name="a-state-change-msg" value={{entry.msg}}>
+                                        ...
+                                    </a>]
+                                {{/if}}
+                            </li>
+                        {{/if}}
+
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="well well-lg">
+        <div class="row" style="padding-top: 10px;">
+            <div class="col-xs-12">
+                <table class="table table-responsive table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Title</th>
+                            <th>Tracker</th>
+                            <th>State</th>
+                            <th>Responsible</th>
+                            <th>Due Date</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each issue in epicIssues}}
+                            <tr>
+                                <td><a name="a-issue-page" href="#nolink" id="{{issue.number}}">{{issue.number}}</a></td>
+                                <td><a name="a-issue-page" href="#nolink" id="{{issue.number}}">{{issue.title}}</a></td>
+                                <td>{{issue.tracker}}</td>
+                                <td>{{issue.state}}</td>
+                                <td><a name="a-user-id" href="#nolink" id="{{issue.responsible}}">{{issue.responsible}}</a></td>
+                                <td>{{issue.dueDate}}</td>
+                                <td>{{issue.createdAt}}</td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </template>
