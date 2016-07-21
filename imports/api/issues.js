@@ -38,10 +38,10 @@ if (Meteor.isServer) {
 
                 var history = [];
                 history.push({
-                        type: '$issueCreated',
-                        date: moment(new Date()).format('YYYY-MM-DD, HH:mm'),
-                        actor: Meteor.user().username,
-                        assignee: responsible});
+                    type: '$issueCreated',
+                    date: moment(new Date()).format('YYYY-MM-DD, HH:mm'),
+                    actor: Meteor.user().username,
+                    assignee: responsible});
 
                 Issues.insert({
                     number: Issues.find({}).count() + 1,

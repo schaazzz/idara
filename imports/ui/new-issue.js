@@ -90,6 +90,7 @@ Meteor.startup(function() {
             metadata: {
                 author: Meteor.user()._id,
                 project: Projects.findOne({'name': activeProject.get()})._id,
+                epic: void 0,
                 issue: void 0
             },
             contentType: file.file.type

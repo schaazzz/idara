@@ -19,13 +19,12 @@ import './body.html';
 
 loggedIn = new ReactiveVar(true);
 target = new ReactiveVar('userPage');
-activeProject = new ReactiveVar(null);
 editEpic = new ReactiveVar(false);
 editIssue = new ReactiveVar(false);
-workflow = new ReactiveVar('default');
+activeProject = new ReactiveVar(null);
 activeWorkflow = new ReactiveVar(null);
-newWorkflow = new ReactiveVar(false);
 activeUserPage = new ReactiveVar(null);
+newWorkflow = new ReactiveVar(false);
 searchTerm = new ReactiveVar(null);
 
 Template.body.onCreated(function onCreated() {

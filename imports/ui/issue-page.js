@@ -74,7 +74,8 @@ Meteor.startup(function() {
             metadata: {
                 author: Meteor.user()._id,
                 project: Projects.findOne({'name': activeProject.get()})._id,
-                issue: Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()})._id
+                issue: Issues.findOne({'number': parseInt(activeIssue.get()), 'project': activeProject.get()})._id,
+                epic: void 0
             },
             contentType: file.file.type
         }, function (error, _id) {

@@ -23,7 +23,7 @@ if (Meteor.isServer) {
     Meteor.startup(function() {
         return Files.allow({
             insert: function(userId, file) {
-                var issueCheckPassed = false;
+                var stateCheckPassed = false;
 
                 var project = Projects.findOne({'_id': file.metadata.project});
                 var user = Meteor.users.findOne({'_id': userId});
@@ -38,11 +38,13 @@ if (Meteor.isServer) {
                             || issue.workflow[issue.stateIndex].openComments
                             || (issue.responsible == user.username)
                         ) {
-                            issueCheckPassed = true;
+                            stateCheckPassed = true;
                         }
                     }
+                } else if (file.metadata.epic) {
+                    stateCheckPassed = true;
                 } else {
-                    issueCheckPassed = true;
+                    stateCheckPassed = true;
                 }
 
                 if (user.profile.isRoot

@@ -5,6 +5,7 @@ import {Issues} from '../api/issues';
 import './project-page.html';
 
 activeIssue = new ReactiveVar('');
+activeEpic = new ReactiveVar('');
 
 Template.projectPage.onRendered(function onRendered() {
 });
