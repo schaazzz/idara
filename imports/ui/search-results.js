@@ -328,5 +328,13 @@ Template.searchResults.events({
         }
 
         finalQuery.set(finalQueryExpression);
-    }
+    },
+    'click [name=a-issue-page]'(event, template) {
+        activeIssue.set(event.target.id);
+        target.set('issuePage');
+    },
+    'click [name=a-user-id]'(event, template) {
+         activeUserPage.set(event.target.id);
+         target.set('userPage');
+    },
 });

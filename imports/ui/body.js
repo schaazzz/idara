@@ -10,6 +10,7 @@ import './user-page';
 import './config-project';
 import './project-page';
 import './project-stats';
+import './taskboard';
 import './new-epic';
 import './new-issue';
 import './epic-page';

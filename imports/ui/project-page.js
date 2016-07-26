@@ -57,6 +57,9 @@ Template.projectPage.events({
         editIssue.set(false);
         target.set('newIssue');
     },
+    'click #a-project-board'(event, template) {
+        target.set('taskboard');
+    },
     'click [name=a-epic-page]'(event, template) {
         activeEpic.set(event.target.id);
         target.set('epicPage');
