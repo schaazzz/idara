@@ -108,6 +108,10 @@ hr {
     border-left: 0px;
 }
 
+.grid-stack {
+    /*height: 50px !important;*/
+}
+
 .grid-stack-item-content {
     color: #2c3e50;
     text-align: center;

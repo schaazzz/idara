@@ -9,31 +9,21 @@ Template.taskboard.onRendered(function onRendered() {
     var options = {
         width: 6,
         float: false,
-        removable: '.trash',
+        animate: true,
+        cellHeight: 50,
+        verticalMargin: 10,
+        disableDrag: false,
         removeTimeout: 100,
-        acceptWidgets: '.grid-stack-item'
+        disableResize: true,
+        acceptWidgets: '.grid-stack-item',
     };
+
     $('#grid1').gridstack(options);
     $('#grid2').gridstack(options);
     $('#grid3').gridstack(options);
     $('#grid4').gridstack(options);
     $('#grid5').gridstack(options);
     $('#grid6').gridstack(options);
-    // $('#grid2').gridstack(_.defaults({
-    //     float: false
-    // }, options));
-    // $('#grid3').gridstack(_.defaults({
-    //     float: false
-    // }, options));
-    // $('#grid4').gridstack(_.defaults({
-    //     float: false
-    // }, options));
-    // $('#grid5').gridstack(_.defaults({
-    //     float: false
-    // }, options));
-    // $('#grid6').gridstack(_.defaults({
-    //     float: false
-    // }, options));
 
     var items = [
         {x: 0, y: 0, width: 2, height: 2},
@@ -42,21 +32,58 @@ Template.taskboard.onRendered(function onRendered() {
         {x: 0, y: 3, width: 2, height: 2},
         {x: 0, y: 4, width: 2, height: 2}
     ];
+    let index = 0;
     $('.grid-stack').each(function () {
         var grid = $(this).data('gridstack');
-        console.log(grid);
-        let index = 0;
+        // console.log(grid);
         _.each(items, function (node) {
             index += 1;
             grid.addWidget($('<div class="grid-stack-item"><div class="grid-stack-item-content">' + index + '</div></div>'),
                 node.x, node.y, node.width, node.height);
         }, this);
     });
-    $('.sidebar .grid-stack-item').draggable({
-        revert: 'invalid',
+
+    $('.grid-stack').on('added', function(event, items) {
+        for (var i = 0; i < items.length; i++) {
+            // console.log('item added', items[i]);
+        }
+    });
+
+    $('.grid-stack').on('change', function(event, items) {
+        for (var i = 0; i < items.length; i++) {
+            // console.log(i, 'item changed', items[i]);
+        }
+
+        $('.grid-stack').each(function () {
+            var grid = $(this).data('gridstack');
+
+            if (grid.isAreaEmpty()) {
+                $(this).attr('data-gs-current-height', 2);
+                $(this).css('height', '110px');
+            }
+        });
+    });
+
+    $('.grid-stack').on('dragstart', function(event, ui) {
+        var grid = this;
+        var element = event.target;
+        // console.log('dragstart', grid, element);
+    });
+
+    $('.grid-stack').on('dragstop', function(event, ui) {
+        var grid = this;
+        var element = event.target;
+        // console.log('dragstop', grid, element);
+    });
+    $('.grid-stack-item').draggable({
+        revert: false,
+        // snap: true,
+        // snapMode: 'inner',
+        // snapTolerance: 50,
         handle: '.grid-stack-item-content',
         scroll: true,
-        appendTo: 'body'
+        appendTo: 'parent',
+        axis: 'x',
     });
 });
 
