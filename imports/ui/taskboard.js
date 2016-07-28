@@ -35,7 +35,7 @@ Template.taskboard.onRendered(function onRendered() {
     let index = 0;
     $('.grid-stack').each(function () {
         var grid = $(this).data('gridstack');
-        // console.log(grid);
+
         _.each(items, function (node) {
             index += 1;
             grid.addWidget($('<div class="grid-stack-item"><div class="grid-stack-item-content">' + index + '</div></div>'),
@@ -45,13 +45,13 @@ Template.taskboard.onRendered(function onRendered() {
 
     $('.grid-stack').on('added', function(event, items) {
         for (var i = 0; i < items.length; i++) {
-            // console.log('item added', items[i]);
+
         }
     });
 
     $('.grid-stack').on('change', function(event, items) {
         for (var i = 0; i < items.length; i++) {
-            // console.log(i, 'item changed', items[i]);
+
         }
 
         $('.grid-stack').each(function () {
