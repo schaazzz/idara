@@ -7,7 +7,7 @@ import './taskboard.html';
 
 Template.taskboard.onRendered(function onRendered() {
     var options = {
-        width: 6,
+        width: 2,
         float: false,
         animate: true,
         cellHeight: 50,
@@ -61,6 +61,9 @@ Template.taskboard.onRendered(function onRendered() {
                 $(this).attr('data-gs-current-height', 2);
                 $(this).css('height', '110px');
             }
+
+            console.log(grid.grid.nodes);
+            GridStackUI.Utils.sort(grid.grid.nodes);
         });
     });
 
@@ -73,7 +76,6 @@ Template.taskboard.onRendered(function onRendered() {
     $('.grid-stack').on('dragstop', function(event, ui) {
         var grid = this;
         var element = event.target;
-        // console.log('dragstop', grid, element);
     });
     $('.grid-stack-item').draggable({
         revert: false,
@@ -83,7 +85,7 @@ Template.taskboard.onRendered(function onRendered() {
         handle: '.grid-stack-item-content',
         scroll: true,
         appendTo: 'parent',
-        axis: 'x',
+        // axis: 'x',
     });
 });
 
