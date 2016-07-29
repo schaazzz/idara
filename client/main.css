@@ -89,27 +89,31 @@ hr {
 }
 
 /*===================================================================================*/
-.row-fluid{
-     white-space: nowrap;
-}
-.row-fluid .col-lg-3{
-     display: inline-block;
-}
+
 
 .task-board-header-col {
-    border: 1px solid black;
+    /*border: 1px solid black;
     border-bottom: none;
-    border-left: 0px;
-    background-color: aliceblue;
+    border-left: 0px;*/
+    /*background-color: aliceblue;*/
 }
 
 .task-board-content-col {
-    border: 1px solid black;
-    border-left: 0px;
+    /*border: 1px solid black;
+    border-left: 0px;*/
+    /*outline: 1px solid; /* use instead of border */
+    /*margin-top: -1px;
+    margin-left: -1px;*/
 }
 
-.grid-stack {
+.task-board-content-col .grid-stack {
+    background-color: #f2f2f2;
+    width: "100%";
+    border-radius: 5px;
     /*height: 50px !important;*/
+    /*outline: 1px solid;
+    margin-top: 1px;
+    margin-left: 1px;*/
 }
 
 .grid-stack-item-content {

@@ -63,7 +63,9 @@ Template.taskboard.onRendered(function onRendered() {
             }
 
             console.log(grid.grid.nodes);
+            grid.batchUpdate();
             GridStackUI.Utils.sort(grid.grid.nodes);
+            grid.commit();
         });
     });
 
