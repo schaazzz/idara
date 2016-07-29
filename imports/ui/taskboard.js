@@ -7,7 +7,7 @@ import './taskboard.html';
 
 Template.taskboard.onRendered(function onRendered() {
     var options = {
-        width: 2,
+        width: 4,
         float: false,
         animate: true,
         cellHeight: 50,
@@ -26,11 +26,11 @@ Template.taskboard.onRendered(function onRendered() {
     $('#grid6').gridstack(options);
 
     var items = [
-        {x: 0, y: 0, width: 2, height: 2},
-        {x: 0, y: 1, width: 2, height: 2},
-        {x: 0, y: 2, width: 2, height: 2},
-        {x: 0, y: 3, width: 2, height: 2},
-        {x: 0, y: 4, width: 2, height: 2}
+        {x: 0, y: 0, width: 4, height: 2},
+        {x: 0, y: 1, width: 4, height: 2},
+        {x: 0, y: 2, width: 4, height: 2},
+        {x: 0, y: 3, width: 4, height: 2},
+        {x: 0, y: 4, width: 4, height: 2}
     ];
     let index = 0;
     $('.grid-stack').each(function () {
@@ -85,8 +85,8 @@ Template.taskboard.onRendered(function onRendered() {
         // snapMode: 'inner',
         // snapTolerance: 50,
         handle: '.grid-stack-item-content',
-        scroll: true,
-        appendTo: 'parent',
+        scroll: false,
+        appendTo: 'body',
         // axis: 'x',
     });
 });
