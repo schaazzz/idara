@@ -67,7 +67,7 @@ Template.taskboard.onRendered(function onRendered() {
     $('.grid-stack').on('dragstart', function(event, ui) {
         var grid = this;
         var element = event.target;
-        // console.log('dragstart', grid, element);
+
     });
 
     $('.grid-stack').on('dragstop', function(event, ui) {
