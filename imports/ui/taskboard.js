@@ -18,29 +18,75 @@ Template.taskboard.onRendered(function onRendered() {
         acceptWidgets: '.grid-stack-item',
     };
 
-    $('#grid1').gridstack(options);
-    $('#grid2').gridstack(options);
-    $('#grid3').gridstack(options);
-    $('#grid4').gridstack(options);
-    $('#grid5').gridstack(options);
-    $('#grid6').gridstack(options);
+    $('#grid-new-epics').gridstack(options);
+    $('#grid-icebox').gridstack(options);
+    $('#grid-backlog').gridstack(options);
+    $('#grid-in-progress').gridstack(options);
+    $('#grid-testing').gridstack(options);
+    $('#grid-closed').gridstack(options);
 
-    var items = [
-        {x: 0, y: 0, width: 4, height: 2},
-        {x: 0, y: 1, width: 4, height: 2},
-        {x: 0, y: 2, width: 4, height: 2},
-        {x: 0, y: 3, width: 4, height: 2},
-        {x: 0, y: 4, width: 4, height: 2}
-    ];
-    let index = 0;
+    // var items = [
+    //     {x: 0, y: 0, width: 4, height: 2},
+    //     {x: 0, y: 1, width: 4, height: 2},
+    //     {x: 0, y: 2, width: 4, height: 2},
+    //     {x: 0, y: 3, width: 4, height: 2},
+    //     {x: 0, y: 4, width: 4, height: 2}
+    // ];
+
+    $('.grid-stack').each(function () {
+        var grid = $(this).data('gridstack');
+        var items;
+        var x = 0, y = 0, w = 4, h = 2;
+
+        console.log(this.id);
+        if (this.id == 'grid-new-epics') {
+            items = Epics.find({'state': 'New'}).fetch();
+        } else if (this.id == 'grid-icebox') {
+            items = Epics.find({'state': 'Icebox'}).fetch();
+        } else if (this.id == 'grid-backlog') {
+            items = Epics.find({'state': 'Backlog'}).fetch();
+        } else if (this.id == 'grid-in-progress') {
+            items = Epics.find({'state': 'InProgress'}).fetch();
+        } else if (this.id == 'grid-testing') {
+            items = Epics.find({'state': 'Testing'}).fetch();
+        } else if (this.id == 'grid-closed') {
+            items = Epics.find({'state': 'Closed'}).fetch();
+        }
+
+        _.each(items, function (node) {
+            let itemClass = 'grid-stack-item-content-none';
+
+            if (node.priority == 'Very Low') {
+                itemClass = 'grid-stack-item-content-very-low';
+            } else if (node.priority == 'Low') {
+                itemClass = 'grid-stack-item-content-low';
+            } else if (node.priority == 'Mid') {
+                itemClass = 'grid-stack-item-content-mid';
+            } else if (node.priority == 'High') {
+                itemClass = 'grid-stack-item-content-high';
+            } else if (node.priority == 'Very High') {
+                itemClass = 'grid-stack-item-content-very-high';
+            }
+
+            var widgetContent =
+                '<strong>Title: </strong>' + node.title +
+                '<br><strong>Priority: </strong>' + node.priority +
+                '<br><strong>Assignee: </strong>' + node.responsible;
+
+            grid.addWidget(
+                $('<div class="grid-stack-item"><div class="grid-stack-item-content small ' + itemClass + '">' + widgetContent + '</div></div>'),
+                x, y, w, h);
+                y += 1;
+        }, this);
+    });
+
     $('.grid-stack').each(function () {
         var grid = $(this).data('gridstack');
 
-        _.each(items, function (node) {
-            index += 1;
-            grid.addWidget($('<div class="grid-stack-item"><div class="grid-stack-item-content">' + index + '</div></div>'),
-                node.x, node.y, node.width, node.height);
-        }, this);
+        if (grid.isAreaEmpty()) {
+            $(this).attr('data-gs-current-height', 2);
+            $(this).css('height', '110px');
+        }
     });
 
     $('.grid-stack').on('added', function(event, items) {
@@ -62,10 +108,7 @@ Template.taskboard.onRendered(function onRendered() {
                 $(this).css('height', '110px');
             }
 
-            console.log(grid.grid.nodes);
-            grid.batchUpdate();
             GridStackUI.Utils.sort(grid.grid.nodes);
-            grid.commit();
         });
     });
 
@@ -94,5 +137,23 @@ Template.taskboard.onRendered(function onRendered() {
 Template.taskboard.helpers({
     project() {
         return Projects.findOne({'name': activeProject.get()});
-    }
+    },
+    newEpics() {
+        return Epics.find({'state': 'New'}).count();
+    },
+    icebox() {
+        return Epics.find({'state': 'Icebox'}).count();
+    },
+    backlog() {
+        return Epics.find({'state': 'Backlog'}).count();
+    },
+    inProgress() {
+        return Epics.find({'state': 'InProgress'}).count();
+    },
+    testing() {
+        return Epics.find({'state': 'Testing'}).count();
+    },
+    closed() {
+        return Epics.find({'state': 'Closed'}).count();
+    },
 });
