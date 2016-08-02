@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Projects } from '../api/projects';
+import { Epics } from '../api/epics';
 import { Issues } from '../api/issues';
 import { Files } from '../api/files';
 import './new-epic.html';
@@ -51,6 +52,15 @@ Template.newEpic.onRendered(function onRendered() {
     Files.resumable.assignDrop($("#div-attach-files-to-epic"));
 
     if (editEpic.get()) {
+        var thisEpic = Epics.findOne({'project': activeProject.get(), 'number': parseInt(activeEpic.get())});
+        $('#epic-title').val(thisEpic.title);
+        this.$('#select-priority').val(thisEpic.priority);
+        this.$('#select-responsible').val(thisEpic.responsible);
+        this.$('#epic-description').val(thisEpic.descriptionMarkdown);
+
+        selectedIssues = thisEpic.issues
+        refreshIssuePopup.set(true);
+        issuesUpdated.set(true);
     }
 });
 
@@ -236,7 +246,6 @@ Template.newEpic.events({
         }
 
         target.set('projectPage');
-
     },
     'click #a-attach-issue-to-epic'(event, template) {
         $('#modal-issues').modal();

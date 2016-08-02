@@ -33,5 +33,8 @@ Template.epicPage.helpers({
 });
 
 Template.epicPage.events({
-
+    'click #a-edit-issue'(event, template) {
+        editEpic.set(true);
+        target.set('newEpic');
+    }
 });

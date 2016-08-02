@@ -72,14 +72,14 @@ Template.taskboard.onRendered(function onRendered() {
                 '<br><strong>Progress: </strong>' + node.progress + '%' +
                 '<div class="row" style="padding-bottom: 0px; padding-top: 1px;">' +
                     '<div class="col-xs-12">' +
-                        '<a href="#nolink" id="a-edit-epic" class="pull-left" style="font-size: 17px; margin-left: 0px;">' +
-                        '<span class="pull-left glyphicon glyphicon-edit" style="margin-top: 10px; color: black"></span>' +
+                        '<a href="#nolink" name="a-edit-epic" class="pull-left" style="font-size: 17px; margin-left: 0px;">' +
+                        '<span id="' + node.project + ':' + node.number + '" class="pull-left glyphicon glyphicon-edit" style="margin-top: 10px; color: #262626"></span>' +
                         '</a>' +
-                        '<a href="#nolink" id="a-view-epic" class="pull-left" style="font-size: 17px; margin-left: 5px;">' +
-                        '<span class="pull-left glyphicon glyphicon-eye-open" style="margin-top: 10px; color: black"></span>' +
+                        '<a href="#nolink" name="a-view-epic" class="pull-left" style="font-size: 17px; margin-left: 5px;">' +
+                        '<span id="' + node.project + ':' + node.number + '" class="pull-left glyphicon glyphicon-eye-open" style="margin-top: 10px; color: #262626"></span>' +
                         '</a>' +
-                        '<a href="#nolink" id="a-delete-epic" class="pull-left" style="font-size: 17px; margin-left: 5px;">' +
-                            '<span class="pull-left glyphicon glyphicon-trash" style="margin-top: 10px; color: black"></span>' +
+                        '<a href="#nolink" name="a-delete-epic" class="pull-left" style="font-size: 17px; margin-left: 5px;">' +
+                            '<span id="' + node.project + ':' + node.number + '" class="pull-left glyphicon glyphicon-trash" style="margin-top: 10px; color: #262626"></span>' +
                         '</a>' +
                     '</div>' +
                 '</div>';
@@ -170,6 +170,7 @@ Template.taskboard.onRendered(function onRendered() {
             cardDragstart.parentId = undefined;
         }
     });
+
     $('.grid-stack-item').draggable({
         revert: false,
         // snap: true,
@@ -180,6 +181,27 @@ Template.taskboard.onRendered(function onRendered() {
         appendTo: 'body',
         // axis: 'x',
     });
+});
+
+Template.taskboard.events({
+    'click [name=a-edit-epic]'(event, template) {
+        var project = event.target.id.split(':')[0];
+        var number = parseInt(event.target.id.split(':')[1]);
+        activeProject.set(project);
+        activeEpic.set(number);
+        editEpic.set(true);
+        target.set('newEpic');
+    },
+    'click [name=a-view-epic]'(event, template) {
+        var project = event.target.id.split(':')[0];
+        var number = parseInt(event.target.id.split(':')[1]);
+        activeProject.set(project);
+        activeEpic.set(number);
+        target.set('epicPage');
+    },
+    'click [name=a-delete-epic]'(event, template) {
+        console.log(event.target.id);
+    },
 });
 
 Template.taskboard.helpers({
