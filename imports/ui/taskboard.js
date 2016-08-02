@@ -5,12 +5,10 @@ import { Epics } from '../api/epics';
 import { Issues } from '../api/issues';
 import './taskboard.html';
 
-let dragstarted = false;
-let dragstopped = false;
-let changed = false;
+let cardDragstart = {epicId: undefined, parentId: undefined, trigger: false};
 
 Template.taskboard.onRendered(function onRendered() {
-    var options = {
+    var defaultOptions = {
         width: 4,
         float: false,
         animate: true,
@@ -22,12 +20,16 @@ Template.taskboard.onRendered(function onRendered() {
         acceptWidgets: '.grid-stack-item',
     };
 
-    $('#grid-new-epics').gridstack(options);
-    $('#grid-icebox').gridstack(options);
-    $('#grid-backlog').gridstack(options);
-    $('#grid-in-progress').gridstack(options);
-    $('#grid-testing').gridstack(options);
-    $('#grid-closed').gridstack(options);
+    var iceboxOptions = jQuery.extend(true, {}, defaultOptions);
+    iceboxOptions.disableDrag = true;
+    iceboxOptions.acceptWidgets = undefined;
+
+    $('#grid-new-epics').gridstack(defaultOptions);
+    $('#grid-backlog').gridstack(defaultOptions);
+    $('#grid-in-progress').gridstack(defaultOptions);
+    $('#grid-testing').gridstack(defaultOptions);
+    $('#grid-closed').gridstack(defaultOptions);
+    $('#grid-icebox').gridstack(iceboxOptions);
 
     $('.grid-stack').each(function () {
         var grid = $(this).data('gridstack');
@@ -105,9 +107,35 @@ Template.taskboard.onRendered(function onRendered() {
     });
 
     $('.grid-stack').on('change', function(event, items) {
-        console.log('change::: ', this.id);
-        for (var i = 0; i < items.length; i++) {
+        var newParentId = this.id;
 
+        if (cardDragstart.trigger) {
+            cardDragstart.trigger = false;
+
+            if (newParentId != cardDragstart.parentId) {
+                var project = cardDragstart.epicId.split(':')[0];
+                var number = parseInt(cardDragstart.epicId.split(':')[1]);
+                var newState = '';
+
+                if (newParentId == 'grid-new-epics') {
+                    newState = 'New';
+                } else if (newParentId == 'grid-icebox') {
+                    newState = 'Icebox';
+                } else if (newParentId == 'grid-backlog') {
+                    newState = 'Backlog';
+                } else if (newParentId == 'grid-in-progress') {
+                    newState = 'InProgress';
+                } else if (newParentId == 'grid-testing') {
+                    newState = 'Testing';
+                } else if (newParentId == 'grid-closed') {
+                    newState = 'Closed';
+                }
+
+                Meteor.call('epics.setState', project, number, newState);
+            }
+
+            cardDragstart.parentId = undefined;
+            cardDragstart.epicId = undefined;
         }
 
         $('.grid-stack').each(function () {
@@ -125,14 +153,22 @@ Template.taskboard.onRendered(function onRendered() {
     $('.grid-stack').on('dragstart', function(event, ui) {
         var grid = this;
         var element = event.target;
-        console.log('dragstart::: ', this.id, ',', element.id);
+
+        cardDragstart.trigger = true;
+        cardDragstart.epicId = element.id;
+        cardDragstart.parentId = this.id;
 
     });
 
     $('.grid-stack').on('dragstop', function(event, ui) {
         var grid = this;
         var element = event.target;
-        console.log('dragstop::: ', this.id, ',', element.id);
+
+        if (cardDragstart.trigger) {
+            cardDragstart.trigger = false;
+            cardDragstart.epicId = undefined;
+            cardDragstart.parentId = undefined;
+        }
     });
     $('.grid-stack-item').draggable({
         revert: false,

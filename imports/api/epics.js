@@ -51,5 +51,21 @@ if (Meteor.isServer) {
         },
         'epics.update'(project, title, descriptionHtml, descriptionMarkdown, issues, priority, responsible, attachedFiles) {
         },
+        'epics.setState'(project, number, state) {
+            check(project, String);
+            check(number, Number);
+            check(state, String);
+
+            var thisEpic = Epics.findOne({'project': project, 'number': number});
+            thisEpic.state = state;
+
+            Epics.update({
+                'project': project, 'number': number
+            }, {
+                $set: {
+                    'state': thisEpic.state
+                }
+            });
+        }
     });
 }
